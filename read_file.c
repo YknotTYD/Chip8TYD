@@ -1,48 +1,21 @@
-/*
-** EPITECH PROJECT, 2024
-** NOP
-** File description:
-** void;
-*/
+//read_file.c
 
-#include <fcntl.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <stdlib.h>
 
-char *read_file(char *filename)
+char *read_file(char *filepath)
 {
-    static const int buffer_size = 16000;
-    int fildes;
-    char buffer[buffer_size];
-    int length;
-    int total_length=0;
-    char *content;
+    char *kronk_buffer;
+    int fildes = open(filepath, O_RDONLY);
+    int length = lseek(fildes, 0, SEEK_END);
 
-    fildes=open(filename, O_RDONLY);
-
-    content=malloc(lseek(fildes, 0, SEEK_END));
-    lseek(fildes, 0, SEEK_SET);
-    
-    length=read(fildes, buffer, buffer_size);
-
-    for (; length; length = read(fildes, buffer, buffer_size)) {
-        for (int i=0; i<length; i++) {
-            content[total_length+i]=buffer[i];
-        }
-        total_length+=length;
+    if (fildes == -1) {
+        return 0;
     }
-        
+    lseek(fildes, 0, SEEK_SET);
+    kronk_buffer = malloc(length);
+    read(fildes, kronk_buffer, length);
     close(fildes);
-
-    return content;
+    return kronk_buffer;
 }
-
-/*int main(void)
-{
-    char *text;
-
-    text=read_file("read_file.c");
-    printf("%s", text);
-    
-    return 0;
-}*/
