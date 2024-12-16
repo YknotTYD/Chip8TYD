@@ -8,32 +8,32 @@
 NAME = Chip8TYD
 
 compile_Ofast:
-	gcc -Ofast -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
+	@ gcc -Ofast -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
 		-o $(NAME)
 
 compile:
-	gcc -Wall -Wextra -g src/*.c -l csfml-graphics -l csfml-window \
+	@ gcc -Wall -Wextra -g src/*.c -l csfml-graphics -l csfml-window \
 		-o $(NAME)
 
 run: compile_Ofast
-	./$(NAME)
-	rm $(NAME)
+	@ ./$(NAME)
+	@ rm $(NAME)
 
 valgrind: compile_Ofast
-	valgrind -s --show-leak-kinds=none \
+	@valgrind -s --show-leak-kinds=none \
 		--track-origins=yes \
 		--leak-check=full \
 		--error-limit=no \
 	./$(NAME)
-	rm $(NAME)
+	@ rm $(NAME)
 
 clean:
-	rm -fr *.o
+	@ rm -fr *.o
 
 fclean: clean
-	rm -f $(NAME)
+	@ rm -f $(NAME)
 
 re: fclean compile
 
 kronk:
-	echo "Oh ouais."
+	@ echo "Oh ouais."
