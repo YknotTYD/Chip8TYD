@@ -28,8 +28,13 @@ typedef struct Chip8Struct {
 
 } Chip8;
 
-void ExecInstruction(Chip8 *chip);
-void InitChip(Chip8 *chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]));
-void LoadChip(Chip8 *chip, char *filename);
+typedef struct {
+    void (*ExecInstruction)(Chip8 *chip);
+    void (*InitChip)(Chip8 **chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]));
+    void (*LoadChip)(Chip8 *chip, char *filename);
+    void (*ProcessFrame)(Chip8 *chip);
+} chip8utils_t;
+
+extern const chip8utils_t Chip8Utils;
 
 #endif

@@ -25,7 +25,7 @@
 
 #include "../include/chip8.h"
 
-void ExecInstruction(Chip8 *chip)
+static void ExecInstruction(Chip8 *chip)
 {
 
     short int opcode=(chip->ROM[chip->program_counter]<<8) |
@@ -36,13 +36,9 @@ void ExecInstruction(Chip8 *chip)
     const int VF=15;
     static int drw_index;
 
-    //printf("%X, %i, %i, %X\n", chip->reg[6], chip->reg[7], chip->reg[10], chip->program_counter);
-    //printf("%X, %X\n\n", opcode, chip->program_counter);
-
     chip->has_drawn=0;
 
     //TODO: 60hz dt and st decrease
-    //opcode = 0xD005;
 
     switch (opcode&0xF000) {
 
@@ -273,34 +269,44 @@ void ExecInstruction(Chip8 *chip)
     return;
 }
 
-void InitChip(Chip8 *chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]))
+static void InitChip(Chip8 **chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]))
 {
 
-    chip->wait_for_input=wait_for_input;
-    chip->update_keys=update_keys;
+    (*chip) = malloc(sizeof(Chip8));
+
+    (*chip)->wait_for_input=wait_for_input;
+    (*chip)->update_keys=update_keys;
 
     for (int i=0; i<32*64; i++) {
-        chip->frame_buffer[i]=0;
+        (*chip)->frame_buffer[i]=0;
     }
     for (int i=0; i<4096; i++) {
-        chip->ROM[i]=0;
+        (*chip)->ROM[i]=0;
     }
     for (int i=0; i<16; i++) {
-        chip->stack[i]=0;
-        chip->reg[i]=0;
-        chip->keypad[i]=0;
+        (*chip)->stack[i]=0;
+        (*chip)->reg[i]=0;
+        (*chip)->keypad[i]=0;
     }
 
-    chip->delay_timer=0;
-    chip->sound_timer=0;
-    chip->index=0;
-    chip->program_counter=0x200;
-    chip->stack_pointer=0;
+    (*chip)->delay_timer=0;
+    (*chip)->sound_timer=0;
+    (*chip)->index=0;
+    (*chip)->program_counter=0x200;
+    (*chip)->stack_pointer=0;
 
     return;
 }
 
-void LoadChip(Chip8 *chip, char *filename)
+static void ProcessFrame(Chip8 *chip) {
+    do {
+        chip->update_keys(&(chip->keypad));
+        ExecInstruction(chip);
+    } while (chip->has_drawn == 0);
+    return;
+}
+
+static void LoadChip(Chip8 *chip, char *filename)
 {
 
     chip->ROM[0x500]=0b10000000;
@@ -431,8 +437,11 @@ void LoadChip(Chip8 *chip, char *filename)
     for (int i = 0; fontset[i]; i++) {
         chip->ROM[i] = fontset[i];
     }
-
     printf("Unsuccessfully loaded file '%s'.\n", filename);
-
     return;
 }
+
+const chip8utils_t Chip8Utils = {
+    ExecInstruction, InitChip,
+    LoadChip, ProcessFrame
+};

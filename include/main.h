@@ -1,7 +1,7 @@
 //header.h
 
-#ifndef HEADERDIG
-    #define HEADERDIG
+#ifndef MAINDEF
+    #define MAINDEF
 
 #include <SFML/Graphics/RenderWindow.h>
 #include <SFML/Graphics/Sprite.h>
@@ -13,6 +13,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include "chip8.h"
+#include "framebuffer.h"
 
 char *read_file(char *filename);
 
