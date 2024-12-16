@@ -77,13 +77,14 @@ int main()
 
         while (!sfRenderWindow_hasFocus(window));
 
-        Chip8Utils.ProcessFrame(chip);
-
         while (sfRenderWindow_pollEvent(window, &event))
         {
             if (event.type == sfEvtClosed)
                 sfRenderWindow_close(window);
         }
+
+        Chip8Utils.ProcessFrame(chip);
+        draw_chip(chip, fbuffer, vlr);
 
         sfTexture_updateFromPixels(
             texture, fbuffer->pixels,
@@ -93,8 +94,6 @@ int main()
         sfSprite_setTexture(sprite, texture, sfFalse);
         sfRenderWindow_clear(window, sfBlack);
         clear_buffer(fbuffer);
-
-        draw_chip(chip, fbuffer, vlr);
 
         sfRenderWindow_drawSprite(window, sprite, NULL);
         sfRenderWindow_display(window);

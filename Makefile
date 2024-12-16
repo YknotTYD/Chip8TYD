@@ -12,14 +12,14 @@ compile_Ofast:
 		-o $(NAME)
 
 compile:
-	@ gcc -Wall -Wextra -g src/*.c -l csfml-graphics -l csfml-window \
+	@ gcc -g -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
 		-o $(NAME)
 
 run: compile_Ofast
 	@ ./$(NAME)
 	@ rm $(NAME)
 
-valgrind: compile_Ofast
+valgrind: compile
 	@valgrind -s --show-leak-kinds=none \
 		--track-origins=yes \
 		--leak-check=full \

@@ -15,6 +15,6 @@
 #include "chip8.h"
 #include "framebuffer.h"
 
-char *read_file(char *filename);
+int read_file(char **kronk_buffer, char *filename);
 
 #endif

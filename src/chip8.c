@@ -24,6 +24,7 @@
 //make a chip-8 assembler
 
 #include "../include/chip8.h"
+#include "../include/main.h"
 
 static void ExecInstruction(Chip8 *chip)
 {
@@ -39,6 +40,8 @@ static void ExecInstruction(Chip8 *chip)
     chip->has_drawn=0;
 
     //TODO: 60hz dt and st decrease
+
+    printf("%x\n", opcode);
 
     switch (opcode&0xF000) {
 
@@ -337,7 +340,7 @@ static void LoadChip(Chip8 *chip, char *filename)
     //regB -> ballyvel-
     //regC -> pong2 x
 
-    short int ops[] = {
+    short int ops_sint[] = {
         0x6308, //0x200 - put keypad s index in reg3
         0x6401, //0x202 - put 1 in reg4 (to sub from reg1)
         0x650A, //0x204 - put keypad z index in reg5
@@ -409,9 +412,11 @@ static void LoadChip(Chip8 *chip, char *filename)
         0x0000, //0x270
     };
 
-    for (int i=0; ops[i]; i++) {
-        chip->ROM[0x200+i*2]=ops[i]>>8;
-        chip->ROM[0x200+i*2+1]=ops[i]&0x00FF;
+    char *ops;
+    int size = read_file(&ops, "files/logo.ch8");
+
+    for (int i=0; i < size; i += 1) {
+        chip->ROM[0x200+i]=ops[i];
     }
 
     static const unsigned char fontset[] = {
