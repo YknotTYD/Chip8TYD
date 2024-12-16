@@ -23,31 +23,7 @@
 //prevent segfault when keypad[VX] && VX >= 16 and such
 //make a chip-8 assembler
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include "header.h"
-
-typedef struct Chip8Struct {
-
-    unsigned char keypad[16];
-
-    unsigned int frame_buffer[32*64];
-    unsigned char ROM[4096];
-    unsigned short int stack[16];
-
-    unsigned char reg[16];
-    unsigned char delay_timer;
-    unsigned char sound_timer;
-    unsigned short int index;
-    unsigned short int program_counter;
-    unsigned char stack_pointer;
-
-    int (*wait_for_input)(void);
-    void (*update_keys)(unsigned char (*keys)[16]);
-    int has_drawn;
-
-} Chip8;
+#include "../include/chip8.h"
 
 void ExecInstruction(Chip8 *chip)
 {
@@ -432,7 +408,7 @@ void LoadChip(Chip8 *chip, char *filename)
         chip->ROM[0x200+i*2+1]=ops[i]&0x00FF;
     }
 
-    const unsigned char fontset[] = {
+    static const unsigned char fontset[] = {
     	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
     	0x20, 0x60, 0x20, 0x20, 0x70, //1
     	0xF0, 0x10, 0xF0, 0x80, 0xF0, //2

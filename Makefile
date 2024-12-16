@@ -1,13 +1,39 @@
+##
+## EPITECH PROJECT, 2024
+## NOP
+## File description:
+## void;
+##
 
-all:
-	gcc -Wall -Wextra *.c -l csfml-graphics -l csfml-window -o damien
+NAME = Chip8TYD
 
-run:
-	gcc -Wall -Wextra *.c -l csfml-graphics -l csfml-window -o damien
-	./damien
-	rm damien
+compile_Ofast:
+	gcc -Ofast -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
+		-o $(NAME)
 
-valgrind:
-	gcc -g  -Wall -Wextra *.c -l csfml-graphics -l csfml-window -o damien
-	valgrind -s --show-leak-kinds=none --track-origins=yes --leak-check=full --error-limit=no ./damien
-	rm damien
+compile:
+	gcc -Wall -Wextra -g src/*.c -l ncurses \
+		-o $(NAME)
+
+run: compile_Ofast
+	./$(NAME)
+	rm $(NAME)
+
+valgrind: compile
+	valgrind -s --show-leak-kinds=none \
+		--track-origins=yes \
+		--leak-check=full \
+		--error-limit=no \
+	./$(NAME)
+	rm $(NAME)
+
+clean:
+	rm -fr *.o
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean compile
+
+kronk:
+	echo "Oh ouais."

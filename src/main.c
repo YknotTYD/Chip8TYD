@@ -1,16 +1,6 @@
 //main.c
 
-#include <SFML/Graphics/RenderWindow.h>
-#include <SFML/Graphics/Sprite.h>
-#include <SFML/Graphics/Texture.h>
-#include <SFML/Window/Keyboard.h>
-//#include <SFML/System/Time.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include "chip8.h"
+#include "../include/header.h"
 
 //draw fbuff
 //put fbuff in text
