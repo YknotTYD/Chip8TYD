@@ -7,12 +7,12 @@
 
 NAME = Chip8TYD
 
-compile_Ofast:
-	@ gcc -Ofast -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
-		-o $(NAME)
-
 compile:
 	@ gcc -g -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
+		-o $(NAME)
+
+compile_Ofast:
+	@ gcc -Ofast -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
 		-o $(NAME)
 
 run: compile
