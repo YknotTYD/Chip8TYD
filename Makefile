@@ -15,7 +15,7 @@ compile:
 	@ gcc -g -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
 		-o $(NAME)
 
-run: compile_Ofast
+run: compile
 	@ ./$(NAME)
 	@ rm $(NAME)
 

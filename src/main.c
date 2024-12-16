@@ -49,16 +49,31 @@ static void draw_chip(Chip8 *chip, FrameBuffer *fbuffer, int vlr)
     }
 }
 
+static int f4_alt(void *args)
+{
+    sfRenderWindow *window = ((void **)args)[0];
+    sfEvent *event = ((void **)args)[1];
+
+    while (sfRenderWindow_pollEvent(window, event))
+    {
+        if ((*event).type == sfEvtClosed) {
+            sfRenderWindow_close(window);
+            return 0;
+        }
+    }
+    return 1;
+}
+
 int main()
 {
 
     static Chip8 *chip;
 
     Chip8Utils.InitChip(&chip, &wait_for_input, &update_keys);
-    Chip8Utils.LoadChip(chip, "logo.ch8");
+    Chip8Utils.LoadChip(chip, "files/roms/trip.ch8");
 
-    srand(time(NULL));
-    
+    Chip8Utils.set_seed(time(NULL));
+
     sfVideoMode mode = {screen_size[0], screen_size[1], 32};
     sfRenderWindow* window;
     sfTexture* texture;
@@ -77,13 +92,9 @@ int main()
 
         while (!sfRenderWindow_hasFocus(window));
 
-        while (sfRenderWindow_pollEvent(window, &event))
-        {
-            if (event.type == sfEvtClosed)
-                sfRenderWindow_close(window);
-        }
+        f4_alt((void *[2]){window, &event});
 
-        Chip8Utils.ProcessFrame(chip);
+        Chip8Utils.ProcessFrame(chip, f4_alt, (void *[2]){window, &event});
         draw_chip(chip, fbuffer, vlr);
 
         sfTexture_updateFromPixels(

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 typedef struct Chip8Struct {
 
@@ -32,7 +33,8 @@ typedef struct {
     void (*ExecInstruction)(Chip8 *chip);
     void (*InitChip)(Chip8 **chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]));
     void (*LoadChip)(Chip8 *chip, char *filename);
-    void (*ProcessFrame)(Chip8 *chip);
+    void (*ProcessFrame)(Chip8 *chip, int (*fallback_function)(void *args), void *args);
+    void (*set_seed)(long long int seed);
 } chip8utils_t;
 
 extern const chip8utils_t Chip8Utils;

@@ -22,14 +22,15 @@
 //Valgroind everything
 //prevent segfault when keypad[VX] && VX >= 16 and such
 //make a chip-8 assembler
+//a binary to assembly tool
 
 #include "../include/chip8.h"
-#include "../include/main.h"
+//#include "../include/main.h"
 
 static void ExecInstruction(Chip8 *chip)
 {
 
-    short int opcode=(chip->ROM[chip->program_counter]<<8) |
+    unsigned short int opcode=(chip->ROM[chip->program_counter]<<8) |
                       chip->ROM[chip->program_counter+1];
 
     const int VX=(opcode&0x0F00)>>8;
@@ -41,7 +42,12 @@ static void ExecInstruction(Chip8 *chip)
 
     //TODO: 60hz dt and st decrease
 
-    printf("%x\n", opcode);
+    if (chip->delay_timer > 0) {
+        chip->delay_timer--;
+    }
+    if (chip->sound_timer > 0) {
+        chip->sound_timer--;
+    }
 
     switch (opcode&0xF000) {
 
@@ -301,124 +307,43 @@ static void InitChip(Chip8 **chip, int (*wait_for_input)(void), void (*update_ke
     return;
 }
 
-static void ProcessFrame(Chip8 *chip) {
+static void ProcessFrame(Chip8 *chip, int (*fallback_function)(void *args), void *args) {
     do {
         chip->update_keys(&(chip->keypad));
         ExecInstruction(chip);
-    } while (chip->has_drawn == 0);
+    } while (chip->has_drawn == 0 && fallback_function(args));
     return;
 }
 
+static int read_file(char **kronk_buffer, char *filepath)
+{
+    int fildes;
+    int lenght;
+    int readsult;
+
+    fildes = open(filepath, O_RDONLY);
+    if (fildes == -1) {
+        return 0;
+    }
+    lenght = lseek(fildes, 0, SEEK_END);
+    lseek(fildes, 0, SEEK_SET);
+    *kronk_buffer = malloc(lenght + 1);
+    if (kronk_buffer == 0) {
+        close(fildes);
+        return 0;
+    }
+    readsult = read(fildes, *kronk_buffer, lenght);
+    if (readsult == 0) {
+        free(*kronk_buffer);
+    }
+    (*kronk_buffer)[lenght] = 0;
+    close(fildes);
+    return lenght;
+}
+
+
 static void LoadChip(Chip8 *chip, char *filename)
 {
-
-    chip->ROM[0x500]=0b10000000;
-    chip->ROM[0x501]=0b10000000;
-    chip->ROM[0x502]=0b10000000;
-    chip->ROM[0x503]=0b10000000;
-    chip->ROM[0x504]=0b10000000;
-    chip->ROM[0x505]=0b10000000;
-    chip->ROM[0x506]=0b10000000;
-    chip->ROM[0x507]=0b10000000;
-
-    chip->ROM[0x508]=0b10000000;
-
-    //0xEXA1 - SKP
-    //0x8XY5 - SUB VX VY
-    //FX33 - LD B VX (1 2 3 in ROM)
-
-    //reg0 -> x
-    //reg1 -> y
-    //reg3 -> s index
-    //reg4 -> 1
-    //reg5 -> z index
-    //reg6 -> ballx
-    //reg7 -> bally
-    //reg8 -> ballxvel+
-    //reg9 -> ballyvel+
-    //regA -> ballxvel-
-    //regB -> ballyvel-
-    //regC -> pong2 x
-
-    short int ops_sint[] = {
-        0x6308, //0x200 - put keypad s index in reg3
-        0x6401, //0x202 - put 1 in reg4 (to sub from reg1)
-        0x650A, //0x204 - put keypad z index in reg5
-        0x6620, //0x204 - set reg6 to 32
-        0x6710, //0x208 - set reg7 to 16
-        0x6801, //0x20A - set reg8 to 1
-        0x6900, //0x20C - set reg9 to 0
-        0x6A00, //0x20E - set regA to 0
-        0x6B01, //0x210 - set regB to 1
-        0x6C3F, //0x212 - set regC to 63
-                //
-        0x2258, //0x214 - call draw func
-                //
-        0xE3A1, //0x216 - skip if reg3 key (s) is pressed
-        0x7101, //0x218 - y++; (if reg3 key (s) is pressed)
-        0xE5A1, //0x21A - skip if reg5 key (z) is pressed
-        0x8145, //0x21C - y -= reg4 (1) (if reg5 key (z) is pressed)
-                //
-        0x4119, //0x21E - skip if reg1 != 32
-        0x6118, //0x220 - y = (32 - 8); (if y == 32)
-        0x41ff, //0x222 - skip if reg1 != 255
-        0x6100, //0x224 - y = 0; (if y == 255)
-                //
-        0x371F, //0x226 - skip if reg7 == 31
-        0x122E, //0x228 - jump to x upper bounce check (if no upper y bounce)
-        0x6900, //0x22A - set reg9  to 0 (0 pos yvel)
-        0x6B01, //0x22C - set regB to 1 (1 neg yvel) 
-                //
-        0x363E, //0x22E - skip if reg6 == 62
-        0x1236, //0x230 - jump to y lower bounce check (if no upper x bounce)
-        0x6800, //0x232 - set reg8  to 0 (0 pos xvel)
-        0x6A01, //0x234 - set regA to 1 (1 neg xvel)
-                //
-        0x3700, //0x236 - skip if reg7 == 0
-        0x1240, //0x238 - jump to lower x bounce check (if no lower y bounce)
-        0x6901, //0x23A - set reg9  to 1 (1 pos yvel)
-        0x6B00, //0x23C - set regB to 0 (0 neg yvel)
-        0x6700, //0x23E - set reg7 to 0 (0 bally)
-                //
-        0x3601, //0x240 - skip if reg6 == 1
-        0x124C, //0x242 - jump to reg[6-7] update (if no lower x bounce)
-        0x6801, //0x244 - set reg8  to 0 (1 pos xvel)
-        0x6A00, //0x246 - set regA to 0 (0 neg xvel)
-        0x6601, //0x248 - set reg6 to 1 (1 ballx)
-        0x2256, //0x24A - call bar collision check
-                //
-        0x8684, //0x24C - reg6 += reg8
-        0x8794, //0x24E - reg7 += reg9
-        0x86A5, //0x250 - reg6 -= regA
-        0x87B5, //0x252 - reg7 -= regB
-                //
-        0x1214, //0x254 - loop to clear
-                //
-                //bar collision check
-                //
-        //0x7000, //  
-        0x00EE, //0x256 - return from call
-                //
-                //draw
-                //
-        0x00E0, //0x258 - clear
-        0xA508, //0x25A - set index to 0x508 (ball sprite)
-        0xD671, //0x25C - draw reg6 reg7 (ball sprite)
-        0xA500, //0x25E - set index to 0x500 (pong sprite)
-        0xD018, //0x260 - draw reg0 reg1 (pong sprite)
-        0xDC78, //0x262 - draw regC reg7 (pong2 sprite)
-        0x00EE, //0x26E - return
-                //
-        0x0000, //0x270
-    };
-
-    char *ops;
-    int size = read_file(&ops, "files/logo.ch8");
-
-    for (int i=0; i < size; i += 1) {
-        chip->ROM[0x200+i]=ops[i];
-    }
-
     static const unsigned char fontset[] = {
     	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
     	0x20, 0x60, 0x20, 0x20, 0x70, //1
@@ -438,15 +363,26 @@ static void LoadChip(Chip8 *chip, char *filename)
     	0xF0, 0x80, 0xF0, 0x80, 0x80, //F
         0x00
     };
+    char *ops;
+    int size = read_file(&ops, filename);
 
     for (int i = 0; fontset[i]; i++) {
         chip->ROM[i] = fontset[i];
     }
-    printf("Unsuccessfully loaded file '%s'.\n", filename);
+    for (int i=0; i < size; i ++) {
+        chip->ROM[0x200+i]=(unsigned char)ops[i];
+    }
+    return;
+}
+
+static void set_seed(long long int seed)
+{
+    srand(seed);
     return;
 }
 
 const chip8utils_t Chip8Utils = {
     ExecInstruction, InitChip,
-    LoadChip, ProcessFrame
+    LoadChip, ProcessFrame,
+    set_seed
 };
