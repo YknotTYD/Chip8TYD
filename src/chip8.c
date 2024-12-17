@@ -56,7 +56,7 @@ static void ExecInstruction(Chip8 *chip)
 
     }
 
-    //printf("%x %x\n", rand() % (0x00FF), rand() % (0x00FF));
+    //printf("0x%04x\n", opcode);
 
     switch (opcode&0xF000) {
 
@@ -189,7 +189,7 @@ static void ExecInstruction(Chip8 *chip)
             break;
 
         case 0xC000: //0xCXNN - RAND VX NN
-            chip->reg[VX]=rand() % (opcode&0x00FF);
+            chip->reg[VX]=rand()&(opcode&0x00FF);
             break;
 
         case 0xD000: //0xDXYN - DRW X Y N
@@ -269,16 +269,17 @@ static void ExecInstruction(Chip8 *chip)
                     chip->index=chip->reg[VX]*5;
                     break;
 
-                case 0xF033: //0xFX33 - LD B VX
+                case 0xF033: //0xFX33 - LD B VX //TODO: [FIX]
                     chip->ROM[chip->index+0]=chip->reg[VX]/100;
                     chip->ROM[chip->index+1]=(chip->reg[VX]/10)%10;
                     chip->ROM[chip->index+2]=chip->reg[VX]%10;
                     break;
 
-                case 0xF055: //0xFX55 - LD VX I
-                    for (int vi=0; vi<VX; vi++) {
-                        chip->reg[vi]=chip->ROM[chip->index+vi];
+                case 0xF055: //0xFX55 - LD VX I //TODO: [FIX]
+                    for (int i=0; i<=VX; i++) {
+                        chip->reg[i]=chip->ROM[chip->index+i];
                     }
+                    chip->index=chip->index+VX+1;
                     break;
                 
             }
