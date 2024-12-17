@@ -2,11 +2,13 @@
 
 #ifndef CHIP8TYD
     #define CHIP8TYD
+    #define NOW (clock()/(double)CLOCKS_PER_SEC)
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <time.h>
 
 typedef struct Chip8Struct {
 
@@ -26,6 +28,7 @@ typedef struct Chip8Struct {
     int (*wait_for_input)(void);
     void (*update_keys)(unsigned char (*keys)[16]);
     int has_drawn;
+    double last_timer_update;
 
 } Chip8;
 

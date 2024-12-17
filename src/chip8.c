@@ -35,19 +35,28 @@ static void ExecInstruction(Chip8 *chip)
 
     const int VX=(opcode&0x0F00)>>8;
     const int VY=(opcode&0x00F0)>>4;
-    const int VF=15;
+    static const int VF=15;
     static int drw_index;
 
     chip->has_drawn=0;
 
     //TODO: 60hz dt and st decrease
 
-    if (chip->delay_timer > 0) {
-        chip->delay_timer--;
+    if ((NOW - chip->last_timer_update) >= 1 / 60.0) {
+
+        chip->last_timer_update = NOW;
+
+        if (chip->delay_timer > 0) {
+            chip->delay_timer--;
+        }
+        if (chip->sound_timer > 0) {
+            //PlaySound();
+            chip->sound_timer--;
+        }
+
     }
-    if (chip->sound_timer > 0) {
-        chip->sound_timer--;
-    }
+
+    //printf("%x %x\n", rand() % (0x00FF), rand() % (0x00FF));
 
     switch (opcode&0xF000) {
 
@@ -176,11 +185,11 @@ static void ExecInstruction(Chip8 *chip)
             break;
 
         case 0xB000: //0xBNNN - JUMP V0 NNN
-            chip->program_counter=chip->reg[0]+(opcode&0x0FFF);
+            chip->program_counter=chip->reg[0]+(opcode&0x0FFF)-2; //-2 to compensate for the +2 at the end
             break;
 
         case 0xC000: //0xCXNN - RAND VX NN
-            chip->reg[VX]=rand()&(opcode&0x00FF); //TODO: check if this works
+            chip->reg[VX]=rand() % (opcode&0x00FF);
             break;
 
         case 0xD000: //0xDXYN - DRW X Y N
@@ -304,6 +313,7 @@ static void InitChip(Chip8 **chip, int (*wait_for_input)(void), void (*update_ke
     (*chip)->index=0;
     (*chip)->program_counter=0x200;
     (*chip)->stack_pointer=0;
+    (*chip)->last_timer_update=0;
 
     return;
 }
