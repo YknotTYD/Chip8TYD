@@ -27,6 +27,7 @@
 //fix emulation speed
 //add sound
 //check 8XY6
+//add pc to asm display
 
 #include "../include/chip8.h"
 //#include "../include/main.h"
@@ -44,6 +45,15 @@ static void ExecInstruction(Chip8 *chip)
     static const int VF=15;
     static int drw_index;
 
+    char *test = bin_to_ASM(opcode);
+
+    if (test != 0) {
+        printf("%s\n", test);
+        //free(test);
+    } else {
+        printf("Unrecognized opcode: 0x%04x.\n", opcode);
+    }
+
     chip->has_drawn=0;
 
     if ((NOW - chip->last_timer_update) >= 1 / 60.0) {
@@ -58,12 +68,6 @@ static void ExecInstruction(Chip8 *chip)
             chip->sound_timer--;
         }
 
-    }
-
-    char *test = bin_to_ASM(opcode);
-
-    if (test != 0) {
-        printf("%s\n", test);
     }
 
     switch (opcode&0xF000) {
