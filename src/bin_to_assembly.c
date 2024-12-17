@@ -1,32 +1,5 @@
-//chip8.c
-
-//0x000 -> 0x200 => System (fonts)
-//0x200 -> 0xfff => User program
 //
-//reg[0] -> reg[15] => V0 -> VF
-//VF => carry/borrow flag (shouldn't be accessed directly)
-//
-//DT => -=1 at 60HZ when > 0
-//ST => same as DT but buzzes when > 0 (can't be read)
-//
-//keypad[16] => 1234QWERASDFZXCV
-//
-//8x15 sprites
-
-//Check for VF in 0X7XNN
-//Give variables for VX and VY instead of doing the huge thing each and every time
-//Same for NN and NNN?
-//
-//display instructions as opcode - SUBN VX VY
-//display the entire ROM
-//Valgroind everything
-//prevent segfault when keypad[VX] && VX >= 16 and such
-//make a chip-8 assembler
-//a binary to assembly tool
-
-#include "../include/chip8.h"
-//#include "../include/main.h"
-
+/*
 static void ExecInstruction(Chip8 *chip)
 {
 
@@ -275,135 +248,20 @@ static void ExecInstruction(Chip8 *chip)
                     chip->ROM[chip->index+0]=chip->reg[VX]/100;
                     chip->ROM[chip->index+1]=(chip->reg[VX]/10)%10;
                     chip->ROM[chip->index+2]=chip->reg[VX]%10;
+                    //chip->index+=2;
                     break;
 
-                case 0xF055: //0xFX55 - LD I VX //TODO: [FIX]
-                    for (int i=0; i<=VX; i++) {
-                        chip->ROM[chip->index]=chip->reg[i];
-                        chip->index++;
-                    }
-                    break;
-
-                case 0xF065: //0xFX65 - LD VX I //TODO: [FIX]
+                case 0xF055: //0xFX55 - LD VX I //TODO: [FIX]
                     for (int i=0; i<=VX; i++) {
                         chip->reg[i]=chip->ROM[chip->index];
                         chip->index++;
                     }
                     break;
-
+                
             }
             break;
     }
     chip->program_counter+=2;
     return;
 }
-
-static void InitChip(Chip8 **chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]))
-{
-
-    (*chip) = malloc(sizeof(Chip8));
-
-    (*chip)->wait_for_input=wait_for_input;
-    (*chip)->update_keys=update_keys;
-
-    for (int i=0; i<32*64; i++) {
-        (*chip)->frame_buffer[i]=0;
-    }
-    for (int i=0; i<4096; i++) {
-        (*chip)->ROM[i]=0;
-    }
-    for (int i=0; i<16; i++) {
-        (*chip)->stack[i]=0;
-        (*chip)->reg[i]=0;
-        (*chip)->keypad[i]=0;
-    }
-
-    (*chip)->delay_timer=0;
-    (*chip)->sound_timer=0;
-    (*chip)->index=0;
-    (*chip)->program_counter=0x200;
-    (*chip)->stack_pointer=0;
-    (*chip)->last_timer_update=0;
-
-    return;
-}
-
-static void ProcessFrame(Chip8 *chip, int (*fallback_function)(void *args), void *args) {
-    do {
-        chip->update_keys(&(chip->keypad));
-        ExecInstruction(chip);
-    } while (chip->has_drawn == 0 && fallback_function(args));
-    return;
-}
-
-static int read_file(char **kronk_buffer, char *filepath)
-{
-    int fildes;
-    int lenght;
-    int readsult;
-
-    fildes = open(filepath, O_RDONLY);
-    if (fildes == -1) {
-        return 0;
-    }
-    lenght = lseek(fildes, 0, SEEK_END);
-    lseek(fildes, 0, SEEK_SET);
-    *kronk_buffer = malloc(lenght + 1);
-    if (kronk_buffer == 0) {
-        close(fildes);
-        return 0;
-    }
-    readsult = read(fildes, *kronk_buffer, lenght);
-    if (readsult == 0) {
-        free(*kronk_buffer);
-    }
-    (*kronk_buffer)[lenght] = 0;
-    close(fildes);
-    return lenght;
-}
-
-
-static void LoadChip(Chip8 *chip, char *filename)
-{
-    static const unsigned char fontset[] = {
-    	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
-    	0x20, 0x60, 0x20, 0x20, 0x70, //1
-    	0xF0, 0x10, 0xF0, 0x80, 0xF0, //2
-    	0xF0, 0x10, 0xF0, 0x10, 0xF0, //3
-    	0x90, 0x90, 0xF0, 0x10, 0x10, //4
-    	0xF0, 0x80, 0xF0, 0x10, 0xF0, //5
-    	0xF0, 0x80, 0xF0, 0x90, 0xF0, //6
-    	0xF0, 0x10, 0x20, 0x40, 0x40, //7
-    	0xF0, 0x90, 0xF0, 0x90, 0xF0, //8
-    	0xF0, 0x90, 0xF0, 0x10, 0xF0, //9
-    	0xF0, 0x90, 0xF0, 0x90, 0x90, //A
-    	0xE0, 0x90, 0xE0, 0x90, 0xE0, //B
-    	0xF0, 0x80, 0x80, 0x80, 0xF0, //C
-    	0xE0, 0x90, 0x90, 0x90, 0xE0, //D
-    	0xF0, 0x80, 0xF0, 0x80, 0xF0, //E
-    	0xF0, 0x80, 0xF0, 0x80, 0x80, //F
-        0x00
-    };
-    char *ops;
-    int size = read_file(&ops, filename);
-
-    for (int i = 0; fontset[i]; i++) {
-        chip->ROM[i] = fontset[i];
-    }
-    for (int i=0; i < size; i ++) {
-        chip->ROM[0x200+i]=(unsigned char)ops[i];
-    }
-    return;
-}
-
-static void set_seed(long long int seed)
-{
-    srand(seed);
-    return;
-}
-
-const chip8utils_t Chip8Utils = {
-    ExecInstruction, InitChip,
-    LoadChip, ProcessFrame,
-    set_seed
-};
+*/

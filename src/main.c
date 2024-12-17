@@ -4,6 +4,7 @@
 
 //free chip
 //set framerate
+//switch to SDL2
 
 static const int vlr=22;
 static const int screen_size[2]={64*vlr, 32*vlr};
@@ -70,7 +71,7 @@ int main()
     static Chip8 *chip;
 
     Chip8Utils.InitChip(&chip, wait_for_input, update_keys);
-    Chip8Utils.LoadChip(chip, "files/roms/test1.ch8");
+    Chip8Utils.LoadChip(chip, "files/roms/trip.ch8");
 
     Chip8Utils.set_seed(time(NULL));
 
