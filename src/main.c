@@ -14,7 +14,7 @@ static const unsigned char keys[16]={
     sfKeyF, sfKeyV
 };
 
-static int wait_for_input()
+static int wait_for_input(void)
 {
     while (1) {
         for (int i=0; i<16; i++) {
@@ -69,8 +69,8 @@ int main()
 
     static Chip8 *chip;
 
-    Chip8Utils.InitChip(&chip, &wait_for_input, &update_keys);
-    Chip8Utils.LoadChip(chip, "files/roms/trip.ch8");
+    Chip8Utils.InitChip(&chip, wait_for_input, update_keys);
+    Chip8Utils.LoadChip(chip, "files/roms/stars.ch8");
 
     Chip8Utils.set_seed(time(NULL));
 

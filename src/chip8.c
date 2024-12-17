@@ -134,11 +134,8 @@ static void ExecInstruction(Chip8 *chip)
                     break;
 
                 case 0x0005: //0x8XY5 - SUB VX VY
+                    chip->reg[VF]=(int)chip->reg[VX] > (int)chip->reg[VY];
                     chip->reg[VX]=chip->reg[VX] - chip->reg[VY];
-                    chip->reg[VF]=0;
-                    if ((int)chip->reg[VX] > (int)chip->reg[VY]) {
-                        chip->reg[VF]=1;
-                    }
                     break;
 
                 case 0x0006: //0x8X(Ynot0?)6 - SHR Vx {,Vy}
@@ -147,19 +144,23 @@ static void ExecInstruction(Chip8 *chip)
                     break;
 
                 case 0x0007: //0x8XY7 - SUBN
-                    chip->reg[VF]=(chip->reg[VX]>chip->reg[VY]);
+                    chip->reg[VF]=(int)chip->reg[VX] < (int)chip->reg[VY];
                     chip->reg[VX]=chip->reg[VY]-chip->reg[VX];
                     break;
 
-                case 0x0008: //0x8XY8 - SHL VX {, VY}
+                case 0x0008: //0x8XY8 - SHL VX {, VY} (//DOESN'T EXIT?)
                     chip->reg[VF]=chip->reg[VX]&0x80;
                     chip->reg[VX]=chip->reg[VX]<<1;
                     break;
 
-                case 0x0009: //0x8XY9 - SNE VX VY
+                case 0x0009: //0x8XY9 - SNE VX VY (//DOESN'T EXIT?)
                     if (chip->reg[VX]!=chip->reg[VY]) {
                         chip->program_counter++;
                     }
+                    break;
+                case 0x000E: //0x8X0E - SHFT VX (//DOESN'T EXIT?)
+                    chip->reg[VF] = chip->reg[VX]>>7;
+                    chip->reg[VX] = chip->reg[VX]<<1;
                     break;
             }
             break;
