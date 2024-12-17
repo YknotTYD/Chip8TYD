@@ -41,5 +41,6 @@ typedef struct {
 } chip8utils_t;
 
 extern const chip8utils_t Chip8Utils;
+char *bin_to_ASM(unsigned short int);
 
 #endif

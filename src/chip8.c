@@ -23,6 +23,10 @@
 //prevent segfault when keypad[VX] && VX >= 16 and such
 //make a chip-8 assembler
 //a binary to assembly tool
+//fix FX65
+//fix emulation speed
+//add sound
+//check 8XY6
 
 #include "../include/chip8.h"
 //#include "../include/main.h"
@@ -42,8 +46,6 @@ static void ExecInstruction(Chip8 *chip)
 
     chip->has_drawn=0;
 
-    //TODO: 60hz dt and st decrease
-
     if ((NOW - chip->last_timer_update) >= 1 / 60.0) {
 
         chip->last_timer_update = NOW;
@@ -58,7 +60,11 @@ static void ExecInstruction(Chip8 *chip)
 
     }
 
-    //printf("0x%04x\n", opcode);
+    char *test = bin_to_ASM(opcode);
+
+    if (test != 0) {
+        printf("%s\n", test);
+    }
 
     switch (opcode&0xF000) {
 
@@ -169,6 +175,7 @@ static void ExecInstruction(Chip8 *chip)
                         chip->program_counter++;
                     }
                     break;
+
                 case 0x000E: //0x8X0E - SHFT VX (//DOESN'T EXIT?)
                     chip->reg[VF] = chip->reg[VX]>>7;
                     chip->reg[VX] = chip->reg[VX]<<1;
@@ -271,13 +278,13 @@ static void ExecInstruction(Chip8 *chip)
                     chip->index=chip->reg[VX]*5;
                     break;
 
-                case 0xF033: //0xFX33 - LD B VX //TODO: [FIX]
+                case 0xF033:
                     chip->ROM[chip->index+0]=chip->reg[VX]/100;
                     chip->ROM[chip->index+1]=(chip->reg[VX]/10)%10;
                     chip->ROM[chip->index+2]=chip->reg[VX]%10;
                     break;
 
-                case 0xF055: //0xFX55 - LD I VX //TODO: [FIX]
+                case 0xF055:
                     for (int i=0; i<=VX; i++) {
                         chip->ROM[chip->index]=chip->reg[i];
                         chip->index++;
