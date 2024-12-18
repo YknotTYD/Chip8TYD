@@ -1,14 +1,16 @@
 //chip8.h
 
-#ifndef CHIP8TYD
-    #define CHIP8TYD
-    #define NOW (clock()/(double)CLOCKS_PER_SEC)
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <time.h>
+
+#ifndef CHIP8TYD
+
+    #define CHIP8TYD
+    #define NOW (clock()/(double)CLOCKS_PER_SEC)
+    #define HEX(c) ((c) > 9 ? 'A' + (c) - 10 : (c) + '0')
 
 typedef struct Chip8Struct {
 

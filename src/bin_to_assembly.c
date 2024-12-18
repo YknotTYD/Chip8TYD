@@ -52,7 +52,7 @@ static char *BTA_nbr_to_str(unsigned long long int nbr)
     int lenght = nbr == 0;
     int i;
 
-    for (int cpy = nbr; cpy; cpy /= 10) {
+    for (int cpy = nbr; cpy; cpy /= 16) {
         lenght++;
     }
 
@@ -60,8 +60,29 @@ static char *BTA_nbr_to_str(unsigned long long int nbr)
     str[lenght] = '\0';
 
     for (i = lenght - 1; i >= 0; i--) {
-        str[i] = '0' + nbr % 10;
+        str[i] = nbr % 10;
         nbr /= 10;
+    }
+
+    return str;
+}
+
+static char *BTA_nbr_to_str_hex(unsigned long long int nbr)
+{
+    char *str;
+    int lenght = nbr == 0;
+    int i;
+
+    for (int cpy = nbr; cpy; cpy /= 16) {
+        lenght++;
+    }
+
+    str = malloc(lenght + 1);
+    str[lenght] = '\0';
+
+    for (i = lenght - 1; i >= 0; i--) {
+        str[i] = HEX(nbr % 16);
+        nbr /= 16;
     }
 
     return str;
@@ -86,9 +107,9 @@ static char *add_v(char *reg)
 char *bin_to_ASM(unsigned short int opcode)
 {
     char *ASM = 0;
-    char *VX=add_v(BTA_nbr_to_str((opcode&0x0F00)>>8));
-    char *VY=add_v(BTA_nbr_to_str((opcode&0x00F0)>>4));
-    char *NNN=BTA_nbr_to_str((opcode&0x0FFF));
+    char *VX=add_v(BTA_nbr_to_str_hex((opcode&0x0F00)>>8));
+    char *VY=add_v(BTA_nbr_to_str_hex((opcode&0x00F0)>>4));
+    char *NNNX=BTA_nbr_to_str_hex((opcode&0x0FFF));
     char *NN=BTA_nbr_to_str((opcode&0x00FF));
     char *N=BTA_nbr_to_str((opcode&0x000F));
     char *VF=malloc(2);
@@ -113,11 +134,11 @@ char *bin_to_ASM(unsigned short int opcode)
             break;
 
         case 0x1000: //0x1NNN - JMP NNN
-            ASM = BTA_str_cat("JMP", NNN, 0, 0);
+            ASM = BTA_str_cat("JMP", NNNX, 0, 0);
             break;
 
         case 0x2000: //0x2NNN - CALL NNN
-            ASM = BTA_str_cat("CALL", NNN, 0, 0);
+            ASM = BTA_str_cat("CALL", NNNX, 0, 0);
             break;
 
         case 0x3000: //0x3XNN - SE VX NN
@@ -196,11 +217,11 @@ char *bin_to_ASM(unsigned short int opcode)
             break;
 
         case 0xA000: //0xANNN - LD I NNN
-            ASM = BTA_str_cat("LD I", NNN, 0, 0);
+            ASM = BTA_str_cat("LD I", NNNX, 0, 0);
             break;
 
         case 0xB000: //0xBNNN - JUMP V0 NNN
-            ASM = BTA_str_cat("JUMP V0", NNN, 0, 0);
+            ASM = BTA_str_cat("JUMP V0", NNNX, 0, 0);
             break;
 
         case 0xC000: //0xCXNN - RAND VX NN
@@ -275,6 +296,6 @@ char *bin_to_ASM(unsigned short int opcode)
     free(VF);
     free(N);
     free(NN);
-    free(NNN);
+    free(NNNX);
     return ASM;
 }

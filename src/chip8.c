@@ -3,34 +3,19 @@
 //0x000 -> 0x200 => System (fonts)
 //0x200 -> 0xfff => User program
 //
-//reg[0] -> reg[15] => V0 -> VF
-//VF => carry/borrow flag (shouldn't be accessed directly)
-//
-//DT => -=1 at 60HZ when > 0
-//ST => same as DT but buzzes when > 0 (can't be read)
-//
 //keypad[16] => 1234QWERASDFZXCV
-//
-//8x15 sprites
 
-//Check for VF in 0X7XNN
-//Give variables for VX and VY instead of doing the huge thing each and every time
-//Same for NN and NNN?
-//
-//display instructions as opcode - SUBN VX VY
 //display the entire ROM
-//Valgroind everything
 //prevent segfault when keypad[VX] && VX >= 16 and such
 //make a chip-8 assembler
-//a binary to assembly tool
 //fix FX65
 //fix emulation speed
 //add sound
 //check 8XY6
 //add pc to asm display
+//make it a library and push it on PYPI
 
 #include "../include/chip8.h"
-//#include "../include/main.h"
 
 static void ExecInstruction(Chip8 *chip)
 {
@@ -48,7 +33,7 @@ static void ExecInstruction(Chip8 *chip)
     char *test = bin_to_ASM(opcode);
 
     if (test != 0) {
-        printf("%s\n", test);
+        printf("%s - 0x%x\n", test, chip->program_counter);
         //free(test);
     } else {
         printf("Unrecognized opcode: 0x%04x.\n", opcode);
