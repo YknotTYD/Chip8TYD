@@ -2,9 +2,6 @@
 
 #include "../include/chip8.h"
 
-//put JMP adress in hex
-//put VX instead of X
-
 static char *BTA_str_cat(char *str0, char *str1,
     char *str2, char *str3) {
 
