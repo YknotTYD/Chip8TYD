@@ -16,10 +16,11 @@
 //make it a library and push it on PYPI
 //add an emulation speed factor
 //check for stuff that could segv
+//investigate stars's abyss
 
 #include "../include/chip8.h"
 
-static void ExecInstruction(Chip8 *chip)
+static int ExecInstruction(Chip8 *chip)
 {
 
     unsigned short int opcode=(chip->ROM[chip->program_counter]<<8) |
@@ -32,13 +33,15 @@ static void ExecInstruction(Chip8 *chip)
     static const int VF=15;
     static int drw_index;
 
-    char *test = bin_to_ASM(opcode);
+    char *asm_repr = bin_to_ASM(opcode);
 
-    if (test) {
-        printf("%s - 0x%x // -> 0x%04x\n", test, chip->program_counter, opcode);
-        free(test);
+    if (asm_repr) {
+        printf("%s - 0x%x // -> 0x%04x\n",
+            asm_repr, chip->program_counter, opcode);
+        free(asm_repr);
     } else {
         printf("Unrecognized opcode: 0x%04x.\n", opcode);
+        return 1;
     }
 
     chip->has_drawn=0;
@@ -293,7 +296,7 @@ static void ExecInstruction(Chip8 *chip)
             break;
     }
     chip->program_counter+=2;
-    return;
+    return 0;
 }
 
 static void InitChip(Chip8 **chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]))
@@ -323,6 +326,12 @@ static void InitChip(Chip8 **chip, int (*wait_for_input)(void), void (*update_ke
     (*chip)->stack_pointer=0;
     (*chip)->last_timer_update=0;
 
+    return;
+}
+
+static void FreeChip(Chip8 *chip)
+{
+    free(chip);
     return;
 }
 
@@ -402,6 +411,6 @@ static void set_seed(long long int seed)
 
 const chip8utils_t Chip8Utils = {
     ExecInstruction, InitChip,
-    LoadChip, ProcessFrame,
-    set_seed
+    FreeChip, LoadChip,
+    ProcessFrame, set_seed
 };

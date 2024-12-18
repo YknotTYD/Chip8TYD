@@ -35,8 +35,9 @@ typedef struct Chip8Struct {
 } Chip8;
 
 typedef struct {
-    void (*ExecInstruction)(Chip8 *chip);
+    int (*ExecInstruction)(Chip8 *chip);
     void (*InitChip)(Chip8 **chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]));
+    void (*FreeChip)(Chip8 *chip);
     void (*LoadChip)(Chip8 *chip, char *filename);
     void (*ProcessFrame)(Chip8 *chip, int (*fallback_function)(void *args), void *args);
     void (*set_seed)(long long int seed);
