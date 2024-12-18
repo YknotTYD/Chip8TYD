@@ -4,6 +4,7 @@
 
 //set framerate
 //switch to SDL3
+//fix wait_input making process unresponsive
 
 static const int vlr=22;
 static const int screen_size[2]={64*vlr, 32*vlr};
@@ -14,7 +15,22 @@ static const unsigned char keys[16]={
     sfKeyF, sfKeyV
 };
 
-static int wait_for_input(void)
+static int f4_alt(void *args)
+{
+    sfRenderWindow *window = ((void **)args)[0];
+    sfEvent *event = ((void **)args)[1];
+
+    while (sfRenderWindow_pollEvent(window, event))
+    {
+        if ((*event).type == sfEvtClosed) {
+            sfRenderWindow_close(window);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int wait_for_input()
 {
     while (1) {
         for (int i=0; i<16; i++) {
@@ -49,28 +65,13 @@ static void draw_chip(Chip8 *chip, FrameBuffer *fbuffer, int vlr)
     }
 }
 
-static int f4_alt(void *args)
-{
-    sfRenderWindow *window = ((void **)args)[0];
-    sfEvent *event = ((void **)args)[1];
-
-    while (sfRenderWindow_pollEvent(window, event))
-    {
-        if ((*event).type == sfEvtClosed) {
-            sfRenderWindow_close(window);
-            return 0;
-        }
-    }
-    return 1;
-}
-
 int main()
 {
 
     static Chip8 *chip;
 
     Chip8Utils.InitChip(&chip, wait_for_input, update_keys);
-    Chip8Utils.LoadChip(chip, "files/roms/tetris.ch8");
+    Chip8Utils.LoadChip(chip, "files/roms/test2.ch8");
 
     Chip8Utils.set_seed(time(NULL));
 

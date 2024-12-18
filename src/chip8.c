@@ -18,6 +18,8 @@
 //check for stuff that could segv
 //investigate stars's abyss
 //add padding to ASM repr?
+//put chip->ROM and chip->frame_buffer on the heap?
+//compile to WASM
 
 #include "../include/chip8.h"
 
@@ -304,10 +306,10 @@ static void InitChip(Chip8 **chip, int (*wait_for_input)(void), void (*update_ke
 
     (*chip) = malloc(sizeof(Chip8));
 
-    (*chip)->wait_for_input=wait_for_input;
-    (*chip)->update_keys=update_keys;
+    (*chip)->wait_for_input = wait_for_input;
+    (*chip)->update_keys = update_keys;
 
-    for (int i=0; i<32*64; i++) {
+    for (int i = 0; i < 32 * 64; i++) {
         (*chip)->frame_buffer[i]=0;
     }
     for (int i=0; i<4096; i++) {
@@ -397,8 +399,8 @@ static void LoadChip(Chip8 *chip, char *filename)
     for (int i = 0; fontset[i]; i++) {
         chip->ROM[i] = fontset[i];
     }
-    for (int i=0; i < size; i ++) {
-        chip->ROM[0x200+i]=(unsigned char)ops[i];
+    for (int i = 0; i < size; i ++) {
+        chip->ROM[0x200 + i] = ops[i];
     }
     return;
 }

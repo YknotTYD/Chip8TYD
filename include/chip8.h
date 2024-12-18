@@ -16,7 +16,7 @@ typedef struct Chip8Struct {
 
     unsigned char keypad[16];
 
-    unsigned int frame_buffer[32*64];
+    unsigned char frame_buffer[32*64];
     unsigned char ROM[4096];
     unsigned short int stack[16];
 
