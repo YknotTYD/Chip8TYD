@@ -46,21 +46,19 @@ static int ExecInstruction(Chip8 *chip)
         return 1;
     }
 
-    chip->has_drawn=0;
-
     if ((NOW - chip->last_timer_update) >= 1 / 60.0) {
-
+    
         chip->last_timer_update = NOW;
 
         if (chip->delay_timer > 0) {
             chip->delay_timer--;
         }
         if (chip->sound_timer > 0) {
-            //PlaySound();
             chip->sound_timer--;
         }
-
     }
+
+    chip->has_drawn=0;
 
     switch (opcode&0xF000) {
 
