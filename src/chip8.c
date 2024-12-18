@@ -17,6 +17,7 @@
 //add an emulation speed factor
 //check for stuff that could segv
 //investigate stars's abyss
+//add padding to ASM repr?
 
 #include "../include/chip8.h"
 
@@ -40,7 +41,8 @@ static int ExecInstruction(Chip8 *chip)
             asm_repr, chip->program_counter, opcode);
         free(asm_repr);
     } else {
-        printf("Unrecognized opcode: 0x%04x.\n", opcode);
+        printf("Unrecognized opcode: [? - 0x%x // -> 0x%04x].\n",
+            chip->program_counter, opcode);
         return 1;
     }
 
