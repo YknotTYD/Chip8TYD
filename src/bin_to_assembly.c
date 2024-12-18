@@ -49,15 +49,15 @@ static char *BTA_nbr_to_str(unsigned long long int nbr)
     int lenght = nbr == 0;
     int i;
 
-    for (int cpy = nbr; cpy; cpy /= 16) {
+    for (int cpy = nbr; cpy; cpy /= 10) {
         lenght++;
     }
 
     str = malloc(lenght + 1);
     str[lenght] = '\0';
 
-    for (i = lenght - 1; i >= 0; i--) {
-        str[i] = nbr % 10;
+    for (i = 0; i < lenght; i++) {
+        str[lenght - i - 1] = '0' + nbr % 10;
         nbr /= 10;
     }
 
@@ -77,8 +77,8 @@ static char *BTA_nbr_to_str_hex(unsigned long long int nbr)
     str = malloc(lenght + 1);
     str[lenght] = '\0';
 
-    for (i = lenght - 1; i >= 0; i--) {
-        str[i] = HEX(nbr % 16);
+    for (i = 0; i < lenght; i++) {
+        str[lenght - i - 1] = HEX(nbr % 16);
         nbr /= 16;
     }
 
@@ -101,14 +101,29 @@ static char *add_v(char *reg)
     return str;
 }
 
+static char *on_heap(char *str)
+{
+    char *dup;
+    int lenght;
+
+    for (lenght = 0; str[lenght]; lenght++);
+    dup = malloc(lenght + 1);
+    dup[lenght] = '\0';
+    for (int i = 0; i < lenght; i++) {
+        dup[i] = str[i];
+    }
+
+    return dup;
+}
+
 char *bin_to_ASM(unsigned short int opcode)
 {
     char *ASM = 0;
     char *VX=add_v(BTA_nbr_to_str_hex((opcode&0x0F00)>>8));
     char *VY=add_v(BTA_nbr_to_str_hex((opcode&0x00F0)>>4));
-    char *NNNX=BTA_nbr_to_str_hex((opcode&0x0FFF));
-    char *NN=BTA_nbr_to_str((opcode&0x00FF));
-    char *N=BTA_nbr_to_str((opcode&0x000F));
+    char *NNNX=BTA_nbr_to_str_hex(opcode&0x0FFF);
+    char *NN=BTA_nbr_to_str(opcode&0x00FF);
+    char *N=BTA_nbr_to_str(opcode&0x000F);
     char *VF=malloc(2);
     VF[0] = 'F';
     VF[1] = '\0';
@@ -121,11 +136,12 @@ char *bin_to_ASM(unsigned short int opcode)
             switch (opcode) {
 
                 case 0x00E0: //0x00E0 - CLS
-                        ASM = "CLS";
+                        ASM = on_heap("CLS");
                         break;
 
                 case 0x00EE: //0x00EE - RET
-                    ASM = "RET";
+                    ASM = on_heap("RET");
+                    break;
             }
 
             break;
@@ -139,7 +155,7 @@ char *bin_to_ASM(unsigned short int opcode)
             break;
 
         case 0x3000: //0x3XNN - SE VX NN
-            ASM = BTA_str_cat("SE",  VX, NN, 0);
+            ASM = BTA_str_cat("SE", VX, NN, 0);
             break;
 
         case 0x4000: //0x4XNN - SNE VX NN

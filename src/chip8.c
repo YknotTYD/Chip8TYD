@@ -14,6 +14,8 @@
 //check 8XY6
 //add pc to asm display
 //make it a library and push it on PYPI
+//add an emulation speed factor
+//check for stuff that could segv
 
 #include "../include/chip8.h"
 
@@ -21,7 +23,7 @@ static void ExecInstruction(Chip8 *chip)
 {
 
     unsigned short int opcode=(chip->ROM[chip->program_counter]<<8) |
-                      chip->ROM[chip->program_counter+1];
+                               chip->ROM[chip->program_counter+1];
 
     const int VX=(opcode&0x0F00)>>8;
     const int VY=(opcode&0x00F0)>>4;
@@ -32,9 +34,9 @@ static void ExecInstruction(Chip8 *chip)
 
     char *test = bin_to_ASM(opcode);
 
-    if (test != 0) {
-        printf("%s - 0x%x\n", test, chip->program_counter);
-        //free(test);
+    if (test) {
+        printf("%s - 0x%x // -> 0x%04x\n", test, chip->program_counter, opcode);
+        free(test);
     } else {
         printf("Unrecognized opcode: 0x%04x.\n", opcode);
     }
