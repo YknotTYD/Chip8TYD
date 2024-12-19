@@ -6,7 +6,7 @@
 ##
 
 SRC  = src/*.c
-LIBS = -l csfml-graphics -l csfml-window
+LIBS = `pkg-config sdl3 --cflags --libs` # -l csfml-graphics -l csfml-window
 NAME = Chip8TYD
 DEFAULTROM  = "files/roms/tetris.ch8"
 

@@ -7,15 +7,15 @@
 #include <string.h>
 
 typedef struct FrameBufferStruct {
-unsigned char *pixels;
+    unsigned int *pixels;
     unsigned int width;
-    unsigned int heigth;
+    unsigned int height;
     unsigned int size[2];
 } FrameBuffer;
 
 FrameBuffer *new_frame_buffer(int width, int heigth);
 void draw_square(FrameBuffer *fbuffer, int xpos, int ypos,
-    int width, int heigth, char color[4]);
+    int width, int heigth, int color);
 void clear_buffer(FrameBuffer *fbuffer);
 
 #endif
