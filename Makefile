@@ -8,7 +8,7 @@
 SRC  = src/*.c
 LIBS = -l csfml-graphics -l csfml-window
 NAME = Chip8TYD
-ROM  = "files/roms/tetris.ch8"
+DEFAULTROM  = "files/roms/tetris.ch8"
 
 compile:
 	@ gcc -g -Wall -Wextra $(SRC) $(LIBS) \
@@ -19,7 +19,7 @@ compile_Ofast:
 		-o $(NAME)
 
 run: compile
-	@ ./$(NAME) $(ROM)
+	@ ./$(NAME) $(DEFAULTROM)
 	@ rm $(NAME)
 
 valgrind: compile
@@ -27,7 +27,7 @@ valgrind: compile
 		--track-origins=yes \
 		--leak-check=full \
 		--error-limit=no \
-	./$(NAME) $(ROM)
+	./$(NAME) $(DEFAULTROM)
 	@ rm $(NAME)
 
 clean:

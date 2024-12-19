@@ -1,6 +1,7 @@
 //main.c
 
 #include "../include/main.h"
+#include <SDL3/SDL.h>
 
 //set framerate
 //switch to SDL3
