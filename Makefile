@@ -8,7 +8,7 @@
 SRC  = src/*.c
 LIBS = `pkg-config sdl3 --cflags --libs` # -l csfml-graphics -l csfml-window
 NAME = Chip8TYD
-DEFAULTROM  = "files/roms/tetris.ch8"
+DEFAULTROM  = "files/roms/brix.ch8"
 
 compile:
 	@ gcc -g -Wall -Wextra $(SRC) $(LIBS) \

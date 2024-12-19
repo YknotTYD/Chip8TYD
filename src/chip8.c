@@ -337,11 +337,20 @@ static void FreeChip(Chip8 *chip)
     return;
 }
 
-static void ProcessFrame(Chip8 *chip, int (*fallback_function)(void *args), void *args) {
+static void ProcessFrame(Chip8 *chip, int frame_number, int (*fallback_function)(void *args), void *args) {
+
+    chip->update_keys(&(chip->keypad));
+    for (int i = 0; i < frame_number; i++) {
+        Chip8Utils.ExecInstruction(chip);
+    }
+
+    return;
+
     do {
-        chip->update_keys(&(chip->keypad));
+    chip->update_keys(&(chip->keypad));
         ExecInstruction(chip);
     } while (chip->has_drawn == 0 && fallback_function(args));
+
     return;
 }
 

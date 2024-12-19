@@ -6,7 +6,6 @@
 //switch to SDL3
 //fix wait_input making process unresponsive
 //fix screen vlr being const
-//fix the keys
 
 static const int vlr=22;
 static int screen_size[2]={64*vlr, 32*vlr};
@@ -16,10 +15,10 @@ static SDL_Renderer *renderer = 0;
 static const bool *keyboard;
 
 static const unsigned char keys[16] = {
-    SDL_SCANCODE_X, SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3,
-    SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_A,
-    SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_Z, SDL_SCANCODE_C,
-    SDL_SCANCODE_4, SDL_SCANCODE_R, SDL_SCANCODE_F, SDL_SCANCODE_V
+    SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3, SDL_SCANCODE_4,
+    SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_R,
+    SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F,
+    SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V
 };
 
 static int wait_for_input()
@@ -37,7 +36,6 @@ static int wait_for_input()
 static void update_keys(unsigned char (*keypad)[16])
 {
     keyboard = SDL_GetKeyboardState(0);
-
     for (int i = 0; i < 16; i++) {
         (*keypad)[i]=keyboard[keys[i]];
     }
@@ -119,17 +117,17 @@ int main(int argc, char **argv)
 
         frame_start = NOW;
 
-        keyboard = SDL_GetKeyboardState(0);
         ch8_cpu_inf_loop_fallback(&event);
+        keyboard = SDL_GetKeyboardState(0);
 
-        Chip8Utils.ProcessFrame(chip, ch8_cpu_inf_loop_fallback, &event);
+        Chip8Utils.ProcessFrame(chip, 10, ch8_cpu_inf_loop_fallback, &event);
 
         clear_buffer(fbuffer);
         draw_chip(chip, fbuffer, vlr);
 
         render(texture, fbuffer);
 
-        while ((NOW - frame_start) < (1 / 100.0));
+        while ((NOW - frame_start) < (1 / (double)FPS));
     }
 
     Chip8Utils.FreeChip(chip);
