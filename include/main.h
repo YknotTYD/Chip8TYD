@@ -3,10 +3,6 @@
 #ifndef MAINDEF
     #define MAINDEF
 
-#include <SFML/Graphics/RenderWindow.h>
-#include <SFML/Graphics/Sprite.h>
-#include <SFML/Graphics/Texture.h>
-#include <SFML/Window/Keyboard.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -14,6 +10,8 @@
 #include <sys/time.h>
 #include "chip8.h"
 #include "framebuffer.h"
+#include <SDL3/SDL.h>
+#define UNPACK2(value) ((value)[0]), ((value)[1])
 
 int read_file(char **kronk_buffer, char *filename);
 
