@@ -65,13 +65,17 @@ static void draw_chip(Chip8 *chip, FrameBuffer *fbuffer, int vlr)
     }
 }
 
-int main()
+int main(int argc, char **argv)
 {
+
+    if (argc < 2) {
+        return 84;
+    }
 
     static Chip8 *chip;
 
     Chip8Utils.InitChip(&chip, wait_for_input, update_keys);
-    Chip8Utils.LoadChip(chip, "files/roms/brix.ch8");
+    Chip8Utils.LoadChip(chip, argv[1]);
 
     Chip8Utils.set_seed(time(NULL));
 

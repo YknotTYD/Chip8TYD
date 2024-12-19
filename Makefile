@@ -5,18 +5,21 @@
 ## void;
 ##
 
+SRC  = src/*.c
+LIBS = -l csfml-graphics -l csfml-window
 NAME = Chip8TYD
+ROM  = "files/roms/tetris.ch8"
 
 compile:
-	@ gcc -g -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
+	@ gcc -g -Wall -Wextra $(SRC) $(LIBS) \
 		-o $(NAME)
 
 compile_Ofast:
-	@ gcc -Ofast -Wall -Wextra src/*.c -l csfml-graphics -l csfml-window \
+	@ gcc -Ofast -Wall -Wextra $(SRC) $(LIBS) \
 		-o $(NAME)
 
 run: compile
-	@ ./$(NAME)
+	@ ./$(NAME) $(ROM)
 	@ rm $(NAME)
 
 valgrind: compile
@@ -24,7 +27,7 @@ valgrind: compile
 		--track-origins=yes \
 		--leak-check=full \
 		--error-limit=no \
-	./$(NAME)
+	./$(NAME) $(ROM)
 	@ rm $(NAME)
 
 clean:
