@@ -71,3 +71,4 @@ void free_stream(stream_t *stream)
     free(stream->data);
     return;
 }
+

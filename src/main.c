@@ -99,15 +99,17 @@ int main(int argc, char **argv)
     Chip8Utils.LoadChip(chip, argv[1]);
     Chip8Utils.set_seed(time(NULL));
 
-    FrameBuffer *fbuffer = new_frame_buffer(UNPACK2(screen_size));
-    clear_buffer(fbuffer);
-
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-    SDL_CreateWindowAndRenderer("ChipTYD", UNPACK2(screen_size), 0, &window, &renderer);
-    SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR32, SDL_TEXTUREACCESS_STREAMING,
-        fbuffer->width, fbuffer->height);
 
+    FrameBuffer *fbuffer = new_frame_buffer(UNPACK2(screen_size));
     stream_t *stream = LoadAudio("files/audio/500.wav");
+
+    SDL_CreateWindowAndRenderer("ChipTYD", UNPACK2(screen_size), 0, &window, &renderer);
+    SDL_Texture *texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_ABGR32, SDL_TEXTUREACCESS_STREAMING,
+        fbuffer->width, fbuffer->height
+    );
 
     while (launched) {
 
@@ -146,3 +148,5 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+
