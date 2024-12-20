@@ -6,8 +6,11 @@
 //switch to SDL3
 //fix wait_input making process unresponsive
 //fix screen vlr being const
+//a sound network
 
 static const int vlr=22;
+static double FPS = 60.0;
+static int CCPF = 10;
 static int screen_size[2]={64*vlr, 32*vlr};
 static int launched = 1;
 static SDL_Window *window = 0;
@@ -88,26 +91,24 @@ int main(int argc, char **argv)
     }
 
     double frame_start;
+    SDL_Event event;
     static Chip8 *chip;
 
     Chip8Utils.InitChip(&chip, wait_for_input, update_keys);
     Chip8Utils.LoadChip(chip, argv[1]);
-
     Chip8Utils.set_seed(time(NULL));
 
     FrameBuffer *fbuffer = new_frame_buffer(UNPACK2(screen_size));
     clear_buffer(fbuffer);
 
-    SDL_Event event;
-
-    SDL_Init(SDL_INIT_VIDEO);
-
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     SDL_CreateWindowAndRenderer("ChipTYD", UNPACK2(screen_size), 0, &window, &renderer);
-    SDL_SetRenderDrawColor(renderer, 22, 22, 22, 255);
-
     SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR32, SDL_TEXTUREACCESS_STREAMING,
         fbuffer->width, fbuffer->height);
 
+    char *filepath = "files/audio/500.wav";
+
+    stream_t *stream = LoopAudio(filepath);
 
     while (launched) {
 
@@ -120,19 +121,29 @@ int main(int argc, char **argv)
         ch8_cpu_inf_loop_fallback(&event);
         keyboard = SDL_GetKeyboardState(0);
 
-        Chip8Utils.ProcessFrame(chip, 10, ch8_cpu_inf_loop_fallback, &event);
+        Chip8Utils.ProcessFrame(
+            chip, CCPF,
+            ch8_cpu_inf_loop_fallback, &event
+        );
+
+        if (chip->sound_timer) {
+            Unpause(stream);
+        } else {
+            Pause(stream);
+        }
 
         clear_buffer(fbuffer);
         draw_chip(chip, fbuffer, vlr);
 
         render(texture, fbuffer);
 
-        while ((NOW - frame_start) < (1 / (double)FPS));
+        while ((NOW - frame_start) < (1 / FPS));
     }
 
     Chip8Utils.FreeChip(chip);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
+    free_stream(stream);
 
     return 0;
 }
