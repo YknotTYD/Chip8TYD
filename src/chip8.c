@@ -277,13 +277,13 @@ static int ExecInstruction(Chip8 *chip)
                     chip->index=chip->reg[VX]*5;
                     break;
 
-                case 0xF033:
+                case 0xF033: //0xFX33 - LD B VX
                     chip->ROM[chip->index+0]=chip->reg[VX]/100;
                     chip->ROM[chip->index+1]=(chip->reg[VX]/10)%10;
                     chip->ROM[chip->index+2]=chip->reg[VX]%10;
                     break;
 
-                case 0xF055:
+                case 0xF055: //0xFX55 - LD I VX
                     for (int i=0; i<=VX; i++) {
                         chip->ROM[chip->index]=chip->reg[i];
                         chip->index++;

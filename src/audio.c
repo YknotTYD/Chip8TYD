@@ -23,7 +23,7 @@ static SDL_AudioStream *LoopStream(const char *filepath, uint8_t **audio_buff, u
     SDL_AudioSpec spec = {SDL_AUDIO_S16, 1, 44100};
     SDL_AudioStream *stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
     SDL_PutAudioStreamData(stream, *audio_buff, *audio_lenght);
-    SDL_PauseAudioDevice(SDL_GetAudioStreamDevice(stream));
+    //SDL_ResumeAudioStreamDevice(stream);
     *audio_data = malloc(sizeof(AudioData));
     (*audio_data)->audio_buff =  *audio_buff;
     (*audio_data)->audio_lenght =  *audio_lenght;

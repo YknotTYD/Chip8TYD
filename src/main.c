@@ -2,12 +2,10 @@
 
 #include "../include/main.h"
 
-//set framerate
-//switch to SDL3
-//fix wait_input making process unresponsive
 //fix screen vlr being const
 //a sound network
 //put most below static functions in a .c
+//switch pause to setvolume
 
 static const int vlr=22;
 static double FPS = 60.0;
@@ -86,6 +84,7 @@ int main(int argc, char **argv)
 {
 
     if (argc < 2) {
+        printf("No ROM given.\nFormat must be \"./Chip8TYD 'path/to/your/rom.ch8'\\n\".\n");
         return 84;
     }
 
@@ -142,5 +141,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
-
