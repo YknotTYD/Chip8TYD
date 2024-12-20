@@ -7,6 +7,7 @@
 //fix wait_input making process unresponsive
 //fix screen vlr being const
 //a sound network
+//put most below static functions in a .c
 
 static const int vlr=22;
 static double FPS = 60.0;
@@ -17,13 +18,6 @@ static SDL_Window *window = 0;
 static SDL_Renderer *renderer = 0;
 static SDL_Event event;
 static const bool *keyboard;
-
-static const unsigned char keys[16] = {
-    SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3, SDL_SCANCODE_4,
-    SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E, SDL_SCANCODE_R,
-    SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F,
-    SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V
-};
 
 static int ch8_cpu_inf_loop_fallback(void *args)
 {
@@ -39,7 +33,7 @@ static int ch8_cpu_inf_loop_fallback(void *args)
     return 1;
 }
 
-static int wait_for_input()
+static int wait_for_input(void)
 {
     while (1) {
         keyboard = SDL_GetKeyboardState(0);
@@ -125,10 +119,7 @@ int main(int argc, char **argv)
         ch8_cpu_inf_loop_fallback(&event);
         keyboard = SDL_GetKeyboardState(0);
 
-        Chip8Utils.ProcessFrame(
-            chip, CCPF,
-            ch8_cpu_inf_loop_fallback, &event
-        );
+        Chip8Utils.ProcessCycles(chip, CCPF);
 
         if (chip->sound_timer) {
             Unpause(stream);

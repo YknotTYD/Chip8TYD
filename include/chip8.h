@@ -39,7 +39,7 @@ typedef struct {
     void (*InitChip)(Chip8 **chip, int (*wait_for_input)(void), void (*update_keys)(unsigned char (*keys)[16]));
     void (*FreeChip)(Chip8 *chip);
     void (*LoadChip)(Chip8 *chip, char *filename);
-    void (*ProcessFrame)(Chip8 *chip, int frame_number, int (*fallback_function)(void *args), void *args);
+    void (*ProcessCycles)(Chip8 *chip, int frame_number);
     void (*set_seed)(long long int seed);
 } chip8utils_t;
 

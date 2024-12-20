@@ -256,6 +256,9 @@ static int ExecInstruction(Chip8 *chip)
 
                 case 0xF00A: //0xFX0A - LD VX K
                     chip->reg[VX]=(chip->wait_for_input)();
+                    if ((char)chip->reg[VX] == -1) {
+                        return -1;
+                    }
                     break;
 
                 case 0xF015: //0xFX15 - LD DT VX
@@ -337,19 +340,15 @@ static void FreeChip(Chip8 *chip)
     return;
 }
 
-static void ProcessFrame(Chip8 *chip, int frame_number, int (*fallback_function)(void *args), void *args) {
+static void ProcessCycles(Chip8 *chip, int frame_number) {
 
     chip->update_keys(&(chip->keypad));
+
     for (int i = 0; i < frame_number; i++) {
-        Chip8Utils.ExecInstruction(chip);
+        if (Chip8Utils.ExecInstruction(chip) == -1) {
+            return;
+        }
     }
-
-    return;
-
-    do {
-    chip->update_keys(&(chip->keypad));
-        ExecInstruction(chip);
-    } while (chip->has_drawn == 0 && fallback_function(args));
 
     return;
 }
@@ -423,5 +422,5 @@ static void set_seed(long long int seed)
 const chip8utils_t Chip8Utils = {
     ExecInstruction, InitChip,
     FreeChip, LoadChip,
-    ProcessFrame, set_seed
+    ProcessCycles, set_seed
 };
