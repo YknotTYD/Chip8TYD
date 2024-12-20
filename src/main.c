@@ -48,8 +48,11 @@ static int wait_for_input()
                 return i;
             }
         }
-        ch8_cpu_inf_loop_fallback(&event);
+        if (!ch8_cpu_inf_loop_fallback(&event)) {
+            break;
+        }
     }
+    return -1;
 }
 
 static void update_keys(unsigned char (*keypad)[16])
