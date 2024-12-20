@@ -17,7 +17,7 @@ typedef struct {
     AudioData *data;
 } stream_t;
 
-stream_t *LoopAudio(const char *filepath);
+stream_t *LoadAudio(const char *filepath);
 void Pause(stream_t *stream);
 void Unpause(stream_t *stream);
 void free_stream(stream_t *stream);

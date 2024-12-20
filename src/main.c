@@ -15,6 +15,7 @@ static int screen_size[2]={64*vlr, 32*vlr};
 static int launched = 1;
 static SDL_Window *window = 0;
 static SDL_Renderer *renderer = 0;
+static SDL_Event event;
 static const bool *keyboard;
 
 static const unsigned char keys[16] = {
@@ -23,6 +24,20 @@ static const unsigned char keys[16] = {
     SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D, SDL_SCANCODE_F,
     SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_V
 };
+
+static int ch8_cpu_inf_loop_fallback(void *args)
+{
+
+    SDL_Event *events = args;
+
+    while (SDL_PollEvent(events)) {
+        if (events->type == SDL_EVENT_QUIT) {
+            launched = 0;
+            return 0;
+        }
+    }
+    return 1;
+}
 
 static int wait_for_input()
 {
@@ -33,6 +48,7 @@ static int wait_for_input()
                 return i;
             }
         }
+        ch8_cpu_inf_loop_fallback(&event);
     }
 }
 
@@ -43,20 +59,6 @@ static void update_keys(unsigned char (*keypad)[16])
         (*keypad)[i]=keyboard[keys[i]];
     }
     return;
-}
-
-static int ch8_cpu_inf_loop_fallback(void *args)
-{
-
-    SDL_Event *event = args;
-
-    while (SDL_PollEvent(event)) {
-        if (event->type == SDL_EVENT_QUIT) {
-            launched = 0;
-            return 0;
-        }
-    }
-    return 1;
 }
 
 static void draw_chip(Chip8 *chip, FrameBuffer *fbuffer, int vlr)
@@ -91,7 +93,6 @@ int main(int argc, char **argv)
     }
 
     double frame_start;
-    SDL_Event event;
     static Chip8 *chip;
 
     Chip8Utils.InitChip(&chip, wait_for_input, update_keys);
@@ -106,9 +107,7 @@ int main(int argc, char **argv)
     SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR32, SDL_TEXTUREACCESS_STREAMING,
         fbuffer->width, fbuffer->height);
 
-    char *filepath = "files/audio/500.wav";
-
-    stream_t *stream = LoopAudio(filepath);
+    stream_t *stream = LoadAudio("files/audio/500.wav");
 
     while (launched) {
 
