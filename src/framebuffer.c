@@ -33,5 +33,8 @@ void draw_square(FrameBuffer *fbuffer, int xpos, int ypos,
 
 void clear_buffer(FrameBuffer *fbuffer)
 {
-    memset((fbuffer->pixels), 0, (fbuffer->width * fbuffer->height * sizeof(int)));
+    for (unsigned int i = 0; i < fbuffer->width * fbuffer->height; i++) {
+        fbuffer->pixels[i] = 0x000000FF;
+    }
+    return;
 }

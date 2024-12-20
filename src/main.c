@@ -6,11 +6,14 @@
 //a sound network
 //put most below static functions in a .c
 //switch pause to setvolume
+//actually no switch to SDL mixer
 
-static const int vlr=22;
+static const int vlr=18;
 static double FPS = 60.0;
 static int CCPF = 10;
-static int screen_size[2]={64*vlr, 32*vlr};
+static int screen_size[2]={1700, 1000};
+static int chip_screen_size[2]={64 * vlr, 32 * vlr};
+static SDL_FRect chip_screen_rect;
 static int launched = 1;
 static SDL_Window *window = 0;
 static SDL_Renderer *renderer = 0;
@@ -19,7 +22,6 @@ static const bool *keyboard;
 
 static int ch8_cpu_inf_loop_fallback(void *args)
 {
-
     SDL_Event *events = args;
 
     while (SDL_PollEvent(events)) {
@@ -74,8 +76,9 @@ static void render(SDL_Texture *texture, FrameBuffer *fbuffer)
 {
     SDL_UpdateTexture(texture, 0, fbuffer->pixels, fbuffer->width * sizeof(int));
     SDL_RenderClear(renderer);
+    DrawText(renderer);
 
-    SDL_RenderTexture(renderer, texture, 0, 0);
+    SDL_RenderTexture(renderer, texture, 0, &chip_screen_rect);
     SDL_RenderPresent(renderer);
     return;
 }
@@ -97,7 +100,7 @@ int main(int argc, char **argv)
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
-    FrameBuffer *fbuffer = new_frame_buffer(UNPACK2(screen_size));
+    FrameBuffer *fbuffer = new_frame_buffer(UNPACK2(chip_screen_size));
     stream_t *stream = LoadAudio("files/audio/500.wav");
 
     SDL_CreateWindowAndRenderer("ChipTYD", UNPACK2(screen_size), 0, &window, &renderer);
@@ -106,6 +109,12 @@ int main(int argc, char **argv)
         SDL_PIXELFORMAT_ABGR32, SDL_TEXTUREACCESS_STREAMING,
         fbuffer->width, fbuffer->height
     );
+    SDL_SetRenderDrawColor(renderer, 22, 22, 22, 255);
+
+    chip_screen_rect = (SDL_FRect){
+        (screen_size[0] - chip_screen_size[0]) / 2.0, (screen_size[1] - chip_screen_size[1]) / 4.0,
+        UNPACK2(chip_screen_size)
+    };
 
     while (launched) {
 
@@ -128,7 +137,6 @@ int main(int argc, char **argv)
 
         clear_buffer(fbuffer);
         draw_chip(chip, fbuffer, vlr);
-
         render(texture, fbuffer);
 
         while ((NOW - frame_start) < (1 / FPS));

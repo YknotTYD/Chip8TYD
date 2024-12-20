@@ -11,11 +11,13 @@
 #include "chip8.h"
 #include "framebuffer.h"
 #include "audio.h"
-#include <SDL3/SDL.h>
+//#include <SDL3/SDL.h>
+//#include <SDL3_ttf/SDL_ttf.h>
 
 #define UNPACK2(value) ((value)[0]), ((value)[1])
 
 int read_file(char **kronk_buffer, char *filename);
+void DrawText(SDL_Renderer *renderer);
 
 static const unsigned char keys[16] = {
     SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3, SDL_SCANCODE_4,
