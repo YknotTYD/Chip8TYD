@@ -345,7 +345,7 @@ static void ProcessCycles(Chip8 *chip, int frame_number) {
     chip->update_keys(&(chip->keypad));
 
     for (int i = 0; i < frame_number; i++) {
-        if (Chip8Utils.ExecInstruction(chip) == -1) {
+        if (ExecInstruction(chip) == -1) {
             return;
         }
     }
