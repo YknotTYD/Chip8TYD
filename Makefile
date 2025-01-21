@@ -1,8 +1,8 @@
 ##
 ## EPITECH PROJECT, 2024
-## NOP
+## Chip8TYD
 ## File description:
-## void;
+## A Chip8 TYD Emulator;
 ##
 
 SRC  = src/*.c

@@ -3,10 +3,10 @@
 #include "../include/main.h"
 //#include <emscripten.h>
 
-static const int vlr=16;
+static const int vlr=17;
 static double FPS = 60.0; //TODO: fix dt/st FPS fuck up
 static int CCPF = 10;
-static int screen_size[2]={1500, 800};
+static int screen_size[2]={1650, 900};
 static int chip_screen_size[2]={64 * vlr, 32 * vlr};
 static const unsigned char *keyboard;
 static context_t context;
@@ -85,9 +85,18 @@ static void main_loop(context_t *context)
 
     SDL_SetRenderDrawColor(context->ren, 22, 22, 22, 255);
     SDL_RenderClear(context->ren);
-    SDL_SetRenderDrawColor(context->ren, 0, 222, 0, 255);
 
+    SDL_SetRenderDrawColor(context->ren, 0, 0, 0, 255);
+    SDL_RenderFillRect(context->ren, &(SDL_Rect){
+        (screen_size[0] - chip_screen_size[0]) / 2,
+        (screen_size[1] - chip_screen_size[1]) / 2,
+        UNPACK2(chip_screen_size)
+    });
+
+
+    SDL_SetRenderDrawColor(context->ren, 0, 222, 0, 255);
     draw_chip(context);
+
     SDL_RenderPresent(context->ren);
 
     while (NOW - frame_start < 1 / FPS);
