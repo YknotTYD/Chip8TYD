@@ -1,32 +1,21 @@
 //main.c
 
 #include "../include/main.h"
+//#include <emscripten.h>
 
-//fix screen vlr being const
-//a sound network
-//put most below static functions in a .c
-//switch pause to setvolume
-//actually no switch to SDL mixer
-
-static const int vlr=18;
-static double FPS = 60.0;
+static const int vlr=16;
+static double FPS = 60.0; //TODO: fix dt/st FPS fuck up
 static int CCPF = 10;
-static int screen_size[2]={1700, 1000};
+static int screen_size[2]={1500, 800};
 static int chip_screen_size[2]={64 * vlr, 32 * vlr};
-static SDL_FRect chip_screen_rect;
-static int launched = 1;
-static SDL_Window *window = 0;
-static SDL_Renderer *renderer = 0;
-static SDL_Event event;
-static const bool *keyboard;
+static const unsigned char *keyboard;
+static context_t context;
 
-static int ch8_cpu_inf_loop_fallback(void *args)
+static int ch8_cpu_inf_loop_fallback(void)
 {
-    SDL_Event *events = args;
-
-    while (SDL_PollEvent(events)) {
-        if (events->type == SDL_EVENT_QUIT) {
-            launched = 0;
+    while (SDL_PollEvent(&context.events)) {
+        if (context.events.type == SDL_QUIT) {
+            context.quit = 1;
             return 0;
         }
     }
@@ -42,7 +31,7 @@ static int wait_for_input(void)
                 return i;
             }
         }
-        if (!ch8_cpu_inf_loop_fallback(&event)) {
+        if (ch8_cpu_inf_loop_fallback() == 0) {
             break;
         }
     }
@@ -55,97 +44,82 @@ static void update_keys(unsigned char (*keypad)[16])
     for (int i = 0; i < 16; i++) {
         (*keypad)[i]=keyboard[keys[i]];
     }
+
     return;
 }
 
-static void draw_chip(Chip8 *chip, FrameBuffer *fbuffer, int vlr)
+static void draw_chip(context_t *context)
 {
     for (int y = 0; y < 32; y++) {
         for (int x = 0; x < 64; x++) {
 
-            if (!chip->frame_buffer[y * 64 + x]) {
+            if (!context->chip->frame_buffer[y * 64 + x]) {
                 continue;
             }
 
-            draw_square(fbuffer, x * vlr, y * vlr, vlr, vlr, 0x14c820FF);
+            SDL_RenderFillRect(
+                context->ren,
+                &(SDL_Rect){(screen_size[0] - chip_screen_size[0]) / 2 + vlr * x,
+                (screen_size[1] - chip_screen_size[1]) / 2 + vlr * y, vlr, vlr}
+            );
         }
     }
+
+    return;
 }
 
-static void render(SDL_Texture *texture, FrameBuffer *fbuffer)
+static void init_context(context_t *context)
 {
-    SDL_UpdateTexture(texture, 0, fbuffer->pixels, fbuffer->width * sizeof(int));
-    SDL_RenderClear(renderer);
-    DrawText(renderer);
+    context->win = SDL_CreateWindow("Chip8TYD", 100, 75, UNPACK2(screen_size), SDL_WINDOW_SHOWN);
+    context->ren = SDL_CreateRenderer(context->win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    context->quit = 0;
+    
+    return;
+}
+static void main_loop(context_t *context)
+{
+    double frame_start = NOW;
 
-    SDL_RenderTexture(renderer, texture, 0, &chip_screen_rect);
-    SDL_RenderPresent(renderer);
+    ch8_cpu_inf_loop_fallback();
+    Chip8Utils.ProcessCycles(context->chip, CCPF);
+
+    SDL_SetRenderDrawColor(context->ren, 22, 22, 22, 255);
+    SDL_RenderClear(context->ren);
+    SDL_SetRenderDrawColor(context->ren, 0, 222, 0, 255);
+
+    draw_chip(context);
+    SDL_RenderPresent(context->ren);
+
+    while (NOW - frame_start < 1 / FPS);
+
     return;
 }
 
 int main(int argc, char **argv)
 {
-
-    if (argc < 2) {
-        printf("No ROM given.\nFormat must be \"./Chip8TYD 'path/to/your/rom.ch8'\\n\".\n");
+    if (argc != 2) {
+        if (argc < 2) {
+            printf("No ROM given.\n");
+        }
+        printf("Format must be \"./Chip8TYD 'path/to/your/rom.ch8'\\n\".\n");
         return 84;
     }
 
-    double frame_start;
-    static Chip8 *chip;
+    init_context(&context);
 
-    Chip8Utils.InitChip(&chip, wait_for_input, update_keys);
-    Chip8Utils.LoadChip(chip, argv[1]);
+    Chip8Utils.InitChip(&context.chip, wait_for_input, update_keys);
+    Chip8Utils.LoadChip(context.chip, argv[1]);
     Chip8Utils.set_seed(time(NULL));
 
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-
-    FrameBuffer *fbuffer = new_frame_buffer(UNPACK2(chip_screen_size));
-    stream_t *stream = LoadAudio("files/audio/500.wav");
-
-    SDL_CreateWindowAndRenderer("ChipTYD", UNPACK2(screen_size), 0, &window, &renderer);
-    SDL_Texture *texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_ABGR32, SDL_TEXTUREACCESS_STREAMING,
-        fbuffer->width, fbuffer->height
-    );
-    SDL_SetRenderDrawColor(renderer, 22, 22, 22, 255);
-
-    chip_screen_rect = (SDL_FRect){
-        (screen_size[0] - chip_screen_size[0]) / 2.0, (screen_size[1] - chip_screen_size[1]) / 4.0,
-        UNPACK2(chip_screen_size)
-    };
-
-    while (launched) {
-
-        while (SDL_GetKeyboardFocus() != window) {
-            ch8_cpu_inf_loop_fallback(&event);
-        }
-
-        frame_start = NOW;
-
-        ch8_cpu_inf_loop_fallback(&event);
-        keyboard = SDL_GetKeyboardState(0);
-
-        Chip8Utils.ProcessCycles(chip, CCPF);
-
-        if (chip->sound_timer) {
-            Unpause(stream);
-        } else {
-            Pause(stream);
-        }
-
-        clear_buffer(fbuffer);
-        draw_chip(chip, fbuffer, vlr);
-        render(texture, fbuffer);
-
-        while ((NOW - frame_start) < (1 / FPS));
+    //emscripten_set_main_loop_args(main_loop, &context, -1, 1);
+    while (context.quit == 0) {
+        main_loop(&context);
     }
 
-    Chip8Utils.FreeChip(chip);
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    free_stream(stream);
+    Chip8Utils.FreeChip(context.chip);
+    SDL_DestroyRenderer(context.ren);
+    SDL_DestroyWindow(context.win);
+    SDL_Quit();
 
     return 0;
 }

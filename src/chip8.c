@@ -49,7 +49,7 @@ static int ExecInstruction(Chip8 *chip)
     }
 
     if ((NOW - chip->last_timer_update) >= 1 / 60.0) {
-    
+
         chip->last_timer_update = NOW;
 
         if (chip->delay_timer > 0) {
@@ -284,15 +284,15 @@ static int ExecInstruction(Chip8 *chip)
                     break;
 
                 case 0xF055: //0xFX55 - LD I VX
-                    for (int i=0; i<=VX; i++) {
-                        chip->ROM[chip->index]=chip->reg[i];
+                    for (int i = 0; i <= VX; i++) {
+                        chip->ROM[chip->index] = chip->reg[i];
                         chip->index++;
                     }
                     break;
 
                 case 0xF065: //0xFX65 - LD VX I //TODO: [FIX]
-                    for (int i=0; i<=VX; i++) {
-                        chip->reg[i]=chip->ROM[chip->index];
+                    for (int i = 0; i <= VX; i++) {
+                        chip->reg[i] = chip->ROM[chip->index];
                         chip->index++;
                     }
                     break;
@@ -380,7 +380,7 @@ static int read_file(char **kronk_buffer, char *filepath)
 }
 
 
-static void LoadChip(Chip8 *chip, char *filename)
+static void LoadChip(Chip8 *chip, char *filepath)
 {
     static const unsigned char fontset[] = {
     	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
@@ -402,7 +402,11 @@ static void LoadChip(Chip8 *chip, char *filename)
         0x00
     };
     char *ops;
-    int size = read_file(&ops, filename);
+    int size = read_file(&ops, filepath);
+
+    if (size == 0) {
+        printf("Failed to load ROM '%s'.\n", filepath);
+    }
 
     for (int i = 0; fontset[i]; i++) {
         chip->ROM[i] = fontset[i];

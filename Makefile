@@ -6,7 +6,7 @@
 ##
 
 SRC  = src/*.c
-LIBS = `pkg-config sdl3 --cflags --libs` # -l csfml-graphics -l csfml-window
+LIBS = -l SDL2
 NAME = Chip8TYD
 DEFAULTROM  = "files/roms/brix.ch8"
 
