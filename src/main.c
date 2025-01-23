@@ -11,6 +11,9 @@ static int chip_screen_size[2]={64 * vlr, 32 * vlr};
 static const unsigned char *keyboard;
 static context_t context;
 
+//compile with font
+//don't create and destroy it every time
+
 static int ch8_cpu_inf_loop_fallback(void)
 {
     while (SDL_PollEvent(&context.events)) {
@@ -73,9 +76,35 @@ static void init_context(context_t *context)
     context->win = SDL_CreateWindow("Chip8TYD", 100, 75, UNPACK2(screen_size), SDL_WINDOW_SHOWN);
     context->ren = SDL_CreateRenderer(context->win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     context->quit = 0;
-    
+    context->font = TTF_OpenFont("assets/fonts/SourceCodePro-Medium.ttf", 30);
+
     return;
 }
+
+static void draw_filename(context_t *context)
+{
+    int width;
+    int height;
+
+    SDL_Surface *surf = TTF_RenderText_Blended_Wrapped(context->font, context->filepath,
+        (SDL_Color){255, 255, 0, 255}, screen_size[0] - 10);
+    SDL_Texture *text = SDL_CreateTextureFromSurface(context->ren, surf);
+
+    SDL_QueryTexture(text, 0, 0, &width, &height);
+
+    SDL_RenderCopy(
+        context->ren, text, 0,
+        &(SDL_Rect){
+        (screen_size[0] - width) / 2, ((screen_size[1] - chip_screen_size[1]) / 2 - height) / 2,
+        width, height}
+    );
+
+    SDL_FreeSurface(surf);
+    SDL_DestroyTexture(text);
+
+    return;
+}
+
 static void main_loop(context_t *context)
 {
     double frame_start = NOW;
@@ -93,9 +122,9 @@ static void main_loop(context_t *context)
         UNPACK2(chip_screen_size)
     });
 
-
     SDL_SetRenderDrawColor(context->ren, 0, 222, 0, 255);
     draw_chip(context);
+    draw_filename(context);
 
     SDL_RenderPresent(context->ren);
 
@@ -114,7 +143,10 @@ int main(int argc, char **argv)
         return 84;
     }
 
+    TTF_Init();
+
     init_context(&context);
+    context.filepath = argv[1];
 
     Chip8Utils.InitChip(&context.chip, wait_for_input, update_keys);
     Chip8Utils.LoadChip(context.chip, argv[1]);
@@ -128,6 +160,7 @@ int main(int argc, char **argv)
     Chip8Utils.FreeChip(context.chip);
     SDL_DestroyRenderer(context.ren);
     SDL_DestroyWindow(context.win);
+    TTF_CloseFont(context.font);
     SDL_Quit();
 
     return 0;

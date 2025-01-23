@@ -6,9 +6,9 @@
 ##
 
 SRC  = src/*.c
-LIBS = -l SDL2
+LIBS = -l SDL2 -l SDL2_ttf
 NAME = Chip8TYD
-DEFAULTROM  = "files/roms/brix.ch8"
+DEFAULTROM  = "assets/roms/brix.ch8"
 
 compile:
 	@ gcc -g -Wall -Wextra $(SRC) $(LIBS) \

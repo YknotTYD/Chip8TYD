@@ -2,6 +2,7 @@
 
 #include "chip8.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -11,10 +12,12 @@
 
 typedef struct {
     Chip8 *chip;
+    TTF_Font *font;
     SDL_Window *win;
     SDL_Renderer *ren;
     SDL_Event events;
     int quit;
+    char *filepath;
 } context_t;
 
 static const unsigned char keys[16] = {
