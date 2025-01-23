@@ -2,5 +2,5 @@
 
 A Chip-8 emulator written in C.
 
-The emulator in itself is made not to rely on the graphics library used (CSFML here).
+The emulator in itself is made not to rely on the graphics library used (SDL2 here).
 [WIP]
