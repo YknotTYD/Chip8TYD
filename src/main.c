@@ -21,13 +21,15 @@ static context_t context;
 //add menus with easing function
 //display FPS
 //move most of main.c away from main.c
-//add a keypad that lights up as you press keys
 //fix emulation speed && FPS fuck up
 //make the window resizable
 //make static consts macros
 //fix the 2 key being fucked up
 //add keys to keys
 //use event to handle the keys instead
+//add a pause option key/button
+//add sliders to choose target FPS / ChipCPU HZ
+//add sound back
 
 static int ch8_cpu_inf_loop_fallback(void)
 {
