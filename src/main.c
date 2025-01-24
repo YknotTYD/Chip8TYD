@@ -3,16 +3,22 @@
 #include "../include/main.h"
 //#include <emscripten.h>
 
-static const int vlr=17;
+static const int vlr=15;
 static double FPS = 60.0; //TODO: fix dt/st FPS fuck up
 static int CCPF = 10;
 static int screen_size[2]={1650, 900};
+static int chip_edge = 3;
+
 static int chip_screen_size[2]={64 * vlr, 32 * vlr};
 static const unsigned char *keyboard;
 static context_t context;
 
 //compile with font
 //don't create and destroy it every time
+//add chip bord
+//display full ASM repr
+//add menus with easing function
+//display FPS
 
 static int ch8_cpu_inf_loop_fallback(void)
 {
@@ -53,6 +59,8 @@ static void update_keys(unsigned char (*keypad)[16])
 
 static void draw_chip(context_t *context)
 {
+    SDL_SetRenderDrawColor(context->ren, 0, 222, 0, 255);
+
     for (int y = 0; y < 32; y++) {
         for (int x = 0; x < 64; x++) {
 
@@ -67,6 +75,41 @@ static void draw_chip(context_t *context)
             );
         }
     }
+
+    return;
+}
+
+static void draw_edge(context_t *context)
+{
+    SDL_SetRenderDrawColor(context->ren, 55, 55, 55, 55);
+
+    SDL_RenderFillRect(context->ren, &(SDL_Rect){
+        (screen_size[0] - chip_screen_size[0]) / 2 - chip_edge,
+        (screen_size[1] - chip_screen_size[1]) / 2 - chip_edge,
+        chip_edge,
+        chip_screen_size[1] + chip_edge
+    });
+
+    SDL_RenderFillRect(context->ren, &(SDL_Rect){
+        (screen_size[0] - chip_screen_size[0]) / 2 - chip_edge,
+        (screen_size[1] - chip_screen_size[1]) / 2 - chip_edge,
+        chip_screen_size[0] + chip_edge,
+        chip_edge
+    });
+
+    SDL_RenderFillRect(context->ren, &(SDL_Rect){
+        (screen_size[0] - chip_screen_size[0]) / 2 - chip_edge,
+        (screen_size[1] - chip_screen_size[1]) / 2 + chip_screen_size[1],
+        chip_screen_size[0] + chip_edge,
+        chip_edge
+    });
+
+    SDL_RenderFillRect(context->ren, &(SDL_Rect){
+        (screen_size[0] - chip_screen_size[0]) / 2 + chip_screen_size[0],
+        (screen_size[1] - chip_screen_size[1]) / 2 - chip_edge,
+        chip_edge,
+        chip_screen_size[1] + chip_edge * 2
+    });
 
     return;
 }
@@ -122,8 +165,8 @@ static void main_loop(context_t *context)
         UNPACK2(chip_screen_size)
     });
 
-    SDL_SetRenderDrawColor(context->ren, 0, 222, 0, 255);
     draw_chip(context);
+    draw_edge(context);
     draw_filename(context);
 
     SDL_RenderPresent(context->ren);
@@ -162,6 +205,7 @@ int main(int argc, char **argv)
     SDL_DestroyWindow(context.win);
     TTF_CloseFont(context.font);
     SDL_Quit();
+
 
     return 0;
 }

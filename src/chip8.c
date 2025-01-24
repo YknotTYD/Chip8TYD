@@ -39,8 +39,8 @@ static int ExecInstruction(Chip8 *chip)
     char *asm_repr = bin_to_ASM(opcode);
 
     if (asm_repr) {
-        printf("%-11s @ 0x%x || 0x%04x - 0b%016b\n",
-            asm_repr, chip->program_counter, opcode, opcode);
+        printf("%-11s @ 0x%x || 0x%04x - 0b%08b_%08b\n",
+            asm_repr, chip->program_counter, opcode, (opcode & 0xFF00) >> 8, opcode & 0x00FF);
         free(asm_repr);
     } else {
         printf("Unrecognized opcode: [? @ 0x%x || 0x%04x - 0b%016b].\n",
