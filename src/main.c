@@ -8,6 +8,8 @@ static double FPS = 60.0; //TODO: fix dt/st FPS fuck up
 static int CCPF = 10;
 static int screen_size[2]={1650, 900};
 static int chip_edge = 3;
+static int key_size = 32;
+static int key_gap = 5;
 
 static int chip_screen_size[2]={64 * vlr, 32 * vlr};
 static const unsigned char *keyboard;
@@ -15,13 +17,16 @@ static context_t context;
 
 //compile with font
 //don't create and destroy it every time
-//add chip bord
 //display full ASM repr
 //add menus with easing function
 //display FPS
 //move most of main.c away from main.c
 //add a keypad that lights up as you press keys
 //fix emulation speed && FPS fuck up
+//make the window resizable
+//make static consts macros
+//fix the 2 key being fucked up
+//add keys to keys
 
 static int ch8_cpu_inf_loop_fallback(void)
 {
@@ -84,7 +89,7 @@ static void draw_chip(context_t *context)
 
 static void draw_edge(context_t *context)
 {
-    SDL_SetRenderDrawColor(context->ren, 55, 55, 55, 55);
+    SDL_SetRenderDrawColor(context->ren, 55, 55, 55, 255);
 
     SDL_RenderFillRect(context->ren, &(SDL_Rect){
         CHIPLEFT - chip_edge,
@@ -151,6 +156,31 @@ static void draw_filename(context_t *context)
     return;
 }
 
+static void draw_keys(context_t *context)
+{
+
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+
+            if (context->chip->keypad[4 * y + x]) {
+                SDL_SetRenderDrawColor(context->ren, 255, 255, 0, 255);                
+            } else {
+                SDL_SetRenderDrawColor(context->ren, 100, 100, 100, 255);
+            }
+
+            SDL_RenderFillRect(context->ren, &(SDL_Rect){
+                screen_size[0] / 2 + (key_size + key_gap) * (x - 2),
+                (key_size + key_gap) * y + CHIPBOTTOM + (screen_size[1] - CHIPBOTTOM - KEYHEIGHT) / 2,
+                key_size,
+                key_size
+            });
+
+        }
+    }
+
+    return;
+}
+
 static void main_loop(context_t *context)
 {
     double frame_start = NOW;
@@ -170,6 +200,7 @@ static void main_loop(context_t *context)
 
     draw_chip(context);
     draw_edge(context);
+    draw_keys(context);
     draw_filename(context);
 
     SDL_RenderPresent(context->ren);

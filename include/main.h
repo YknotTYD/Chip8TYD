@@ -11,6 +11,8 @@
     #define UNPACK2(arr) arr[0], arr[1]
     #define CHIPLEFT ((screen_size[0] - chip_screen_size[0]) / 2)
     #define CHIPTOP ((screen_size[1] - chip_screen_size[1]) / 2) * 0.8
+    #define CHIPBOTTOM (CHIPTOP + chip_screen_size[1])
+    #define KEYHEIGHT ((key_size + key_gap) * 4)
 
 typedef struct {
     Chip8 *chip;
