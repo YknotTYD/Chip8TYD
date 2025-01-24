@@ -27,6 +27,7 @@ static context_t context;
 //make static consts macros
 //fix the 2 key being fucked up
 //add keys to keys
+//use event to handle the keys instead
 
 static int ch8_cpu_inf_loop_fallback(void)
 {
@@ -58,6 +59,7 @@ static int wait_for_input(void)
 static void update_keys(unsigned char (*keypad)[16])
 {
     keyboard = SDL_GetKeyboardState(0);
+
     for (int i = 0; i < 16; i++) {
         (*keypad)[i]=keyboard[keys[i]];
     }
