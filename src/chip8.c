@@ -39,12 +39,12 @@ static int ExecInstruction(Chip8 *chip)
     char *asm_repr = bin_to_ASM(opcode);
 
     if (asm_repr) {
-        printf("%-11s @ 0x%x || 0x%04x\n",
-            asm_repr, chip->program_counter, opcode);
+        printf("%-11s @ 0x%x || 0x%04x - 0b%016b\n",
+            asm_repr, chip->program_counter, opcode, opcode);
         free(asm_repr);
     } else {
-        printf("Unrecognized opcode: [? @ 0x%x || 0x%04x].\n",
-            chip->program_counter, opcode);
+        printf("Unrecognized opcode: [? @ 0x%x || 0x%04x - 0b%016b].\n",
+            chip->program_counter, opcode, opcode);
         return 1;
     }
 
