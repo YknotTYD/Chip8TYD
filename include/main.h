@@ -9,6 +9,8 @@
 #ifndef MAIN_HEADER
     #define MAIN_HEADER
     #define UNPACK2(arr) arr[0], arr[1]
+    #define CHIPLEFT ((screen_size[0] - chip_screen_size[0]) / 2)
+    #define CHIPTOP ((screen_size[1] - chip_screen_size[1]) / 2) * 0.8
 
 typedef struct {
     Chip8 *chip;

@@ -19,6 +19,9 @@ static context_t context;
 //display full ASM repr
 //add menus with easing function
 //display FPS
+//move most of main.c away from main.c
+//add a keypad that lights up as you press keys
+//fix emulation speed && FPS fuck up
 
 static int ch8_cpu_inf_loop_fallback(void)
 {
@@ -70,8 +73,8 @@ static void draw_chip(context_t *context)
 
             SDL_RenderFillRect(
                 context->ren,
-                &(SDL_Rect){(screen_size[0] - chip_screen_size[0]) / 2 + vlr * x,
-                (screen_size[1] - chip_screen_size[1]) / 2 + vlr * y, vlr, vlr}
+                &(SDL_Rect){CHIPLEFT + vlr * x,
+                CHIPTOP + vlr * y, vlr, vlr}
             );
         }
     }
@@ -84,29 +87,29 @@ static void draw_edge(context_t *context)
     SDL_SetRenderDrawColor(context->ren, 55, 55, 55, 55);
 
     SDL_RenderFillRect(context->ren, &(SDL_Rect){
-        (screen_size[0] - chip_screen_size[0]) / 2 - chip_edge,
-        (screen_size[1] - chip_screen_size[1]) / 2 - chip_edge,
+        CHIPLEFT - chip_edge,
+        CHIPTOP - chip_edge,
         chip_edge,
         chip_screen_size[1] + chip_edge
     });
 
     SDL_RenderFillRect(context->ren, &(SDL_Rect){
-        (screen_size[0] - chip_screen_size[0]) / 2 - chip_edge,
-        (screen_size[1] - chip_screen_size[1]) / 2 - chip_edge,
+        CHIPLEFT - chip_edge,
+        CHIPTOP - chip_edge,
         chip_screen_size[0] + chip_edge,
         chip_edge
     });
 
     SDL_RenderFillRect(context->ren, &(SDL_Rect){
-        (screen_size[0] - chip_screen_size[0]) / 2 - chip_edge,
-        (screen_size[1] - chip_screen_size[1]) / 2 + chip_screen_size[1],
+        CHIPLEFT - chip_edge,
+        CHIPTOP + chip_screen_size[1],
         chip_screen_size[0] + chip_edge,
         chip_edge
     });
 
     SDL_RenderFillRect(context->ren, &(SDL_Rect){
-        (screen_size[0] - chip_screen_size[0]) / 2 + chip_screen_size[0],
-        (screen_size[1] - chip_screen_size[1]) / 2 - chip_edge,
+        CHIPLEFT + chip_screen_size[0],
+        CHIPTOP - chip_edge,
         chip_edge,
         chip_screen_size[1] + chip_edge * 2
     });
@@ -138,7 +141,7 @@ static void draw_filename(context_t *context)
     SDL_RenderCopy(
         context->ren, text, 0,
         &(SDL_Rect){
-        (screen_size[0] - width) / 2, ((screen_size[1] - chip_screen_size[1]) / 2 - height) / 2,
+        (screen_size[0] - width) / 2, (CHIPTOP - height) / 2,
         width, height}
     );
 
@@ -160,8 +163,8 @@ static void main_loop(context_t *context)
 
     SDL_SetRenderDrawColor(context->ren, 0, 0, 0, 255);
     SDL_RenderFillRect(context->ren, &(SDL_Rect){
-        (screen_size[0] - chip_screen_size[0]) / 2,
-        (screen_size[1] - chip_screen_size[1]) / 2,
+        CHIPLEFT,
+        CHIPTOP,
         UNPACK2(chip_screen_size)
     });
 
