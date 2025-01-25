@@ -3,6 +3,7 @@
 #include "chip8.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -13,10 +14,12 @@
     #define CHIPTOP ((screen_size[1] - chip_screen_size[1]) / 2) * 0.8
     #define CHIPBOTTOM (CHIPTOP + chip_screen_size[1])
     #define KEYHEIGHT ((key_size + key_gap) * 4)
+    #define CHIP_SOUND_CHANNEL 0
 
 typedef struct {
     Chip8 *chip;
     TTF_Font *font;
+    Mix_Chunk *sound;
     SDL_Window *win;
     SDL_Renderer *ren;
     SDL_Event events;

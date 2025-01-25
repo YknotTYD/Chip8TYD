@@ -6,7 +6,7 @@
 ##
 
 SRC  = src/*.c
-LIBS = -l SDL2 -l SDL2_ttf
+LIBS = -l SDL2 -l SDL2_ttf -l SDL2_mixer
 NAME = Chip8TYD
 DEFAULTROM  = "assets/roms/brix.ch8"
 

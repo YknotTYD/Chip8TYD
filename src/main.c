@@ -14,6 +14,7 @@ static int key_gap = 5;
 static int chip_screen_size[2]={64 * vlr, 32 * vlr};
 static const unsigned char *keyboard;
 static context_t context;
+static int just_beeped;
 
 //compile with font
 //don't create and destroy it every time
@@ -29,7 +30,7 @@ static context_t context;
 //use event to handle the keys instead
 //add a pause option key/button
 //add sliders to choose target FPS / ChipCPU HZ
-//add sound back
+//fix sound (?)
 
 static int ch8_cpu_inf_loop_fallback(void)
 {
@@ -128,9 +129,18 @@ static void draw_edge(context_t *context)
 
 static void init_context(context_t *context)
 {
+
     context->win = SDL_CreateWindow("Chip8TYD", 100, 75, UNPACK2(screen_size), SDL_WINDOW_SHOWN);
     context->ren = SDL_CreateRenderer(context->win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     context->quit = 0;
+
+    TTF_Init();
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+
+    context->sound = Mix_LoadWAV("assets/audio/500.wav");    
+    Mix_PlayChannel(CHIP_SOUND_CHANNEL, context->sound, -1);
+    Mix_Volume(CHIP_SOUND_CHANNEL, 0);
+    
     context->font = TTF_OpenFont("assets/fonts/SourceCodePro-Medium.ttf", 30);
 
     return;
@@ -192,6 +202,17 @@ static void main_loop(context_t *context)
     ch8_cpu_inf_loop_fallback();
     Chip8Utils.ProcessCycles(context->chip, CCPF);
 
+    if (context->chip->sound_timer) {
+        if (Mix_Volume(CHIP_SOUND_CHANNEL, -1) == 0) {
+            Mix_Volume(CHIP_SOUND_CHANNEL, 100);
+            just_beeped = 1;
+        }
+    } else if (Mix_Volume(CHIP_SOUND_CHANNEL, -1) && just_beeped <= -4) {
+        Mix_Volume(CHIP_SOUND_CHANNEL, 0);
+    }
+
+    just_beeped -= just_beeped > -100;
+
     SDL_SetRenderDrawColor(context->ren, 22, 22, 22, 255);
     SDL_RenderClear(context->ren);
 
@@ -224,8 +245,6 @@ int main(int argc, char **argv)
         return 84;
     }
 
-    TTF_Init();
-
     init_context(&context);
     context.filepath = argv[1];
 
@@ -242,8 +261,8 @@ int main(int argc, char **argv)
     SDL_DestroyRenderer(context.ren);
     SDL_DestroyWindow(context.win);
     TTF_CloseFont(context.font);
+    Mix_FreeChunk(context.sound);
     SDL_Quit();
-
 
     return 0;
 }
