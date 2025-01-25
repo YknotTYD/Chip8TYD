@@ -14,7 +14,7 @@ static int key_gap = 5;
 static int chip_screen_size[2]={64 * vlr, 32 * vlr};
 static const unsigned char *keyboard;
 static context_t context;
-static int just_beeped;
+static int beep_duration;
 
 //compile with font
 //don't create and destroy it every time
@@ -31,6 +31,8 @@ static int just_beeped;
 //add a pause option key/button
 //add sliders to choose target FPS / ChipCPU HZ
 //fix sound (?)
+//stop it when not focused?
+//display the entire ROM
 
 static int ch8_cpu_inf_loop_fallback(void)
 {
@@ -204,14 +206,14 @@ static void main_loop(context_t *context)
 
     if (context->chip->sound_timer) {
         if (Mix_Volume(CHIP_SOUND_CHANNEL, -1) == 0) {
-            Mix_Volume(CHIP_SOUND_CHANNEL, 100);
-            just_beeped = 1;
+            Mix_Volume(CHIP_SOUND_CHANNEL, 50);
+            beep_duration = 0;
         }
-    } else if (Mix_Volume(CHIP_SOUND_CHANNEL, -1) && just_beeped <= -4) {
+    } else if (Mix_Volume(CHIP_SOUND_CHANNEL, -1) && beep_duration >= 6) {
         Mix_Volume(CHIP_SOUND_CHANNEL, 0);
     }
 
-    just_beeped -= just_beeped > -100;
+    beep_duration++;
 
     SDL_SetRenderDrawColor(context->ren, 22, 22, 22, 255);
     SDL_RenderClear(context->ren);

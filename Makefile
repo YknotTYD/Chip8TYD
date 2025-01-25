@@ -22,6 +22,16 @@ run: compile
 	@ ./$(NAME) $(DEFAULTROM)
 	@ rm $(NAME)
 
+log: compile
+	@ ./$(NAME) $(DEFAULTROM) > ~log
+	@ rm $(NAME)
+
+logless: compile
+	@ ./$(NAME) $(DEFAULTROM) > ~log
+	@ rm $(NAME)
+	@ cat ~log | less
+	@rm ~log
+
 valgrind: compile
 	@valgrind -s --show-leak-kinds=none \
 		--track-origins=yes \
